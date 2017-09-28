@@ -1,0 +1,178 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+  <title>JD'S GAMESUITE</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <link rel="stylesheet" href="xenon.css" title="Main Look">
+  <link href="https://fonts.googleapis.com/css?family=Titillium+Web" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Fascinate+Inline" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Erica+One" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Lobster" rel="stylesheet">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <!-- Optional theme -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+  <!-- Latest compiled and minified JavaScript -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div class="top-banner">
+    <div class="banner-jt">
+      <h1 class="banner-title" align="center"><span class="btitle1">Game</span><span class="btitle2">Suite</span></h1>
+    </div>
+  </div>
+  <div class="container-fluid" id="game-container">
+    <header>
+      <nav class="navbar navbar-inverse navbar-static-top">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="http://localhost:8081/">Home</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="#">Home</a></li>
+            <li><a href="" data-toggle="modal" data-target="#about-modal">About</a></li>
+            <li><a href="#">Quit</a></li>
+          </ul>
+        </div>
+      </nav>
+    </header>
+    <div id="about-modal" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title">About GameSuite</h4>
+          </div>
+          <div class="modal-body">
+            <p>GameSuite is an ever-growing collection of mobile web games brought to you by the
+            power of Node.js.  Start by selecting any game in the menu.  GameSuite supports
+            multiple games simultaneously, and each game has a particular player limit.  To
+            see the instructions for any game, select it from the main menu and tap "About".</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="lobby-content">
+      <!-- Main -->
+      <div class="menu-view">
+        <ul class="lobby-menu">
+          <li class="lm-imposter"><span class="label label-info imposter-btn" data-toggle="collapse" data-target="#imposter-dd" style="padding-right:30px;">Imposter</span></li>
+            <div id="imposter-dd" class="collapse lm-dd">
+              <button class="imposter-new-btn btn btn-primary">New</button>
+              <button class="imposter-join-btn btn btn-info">Join</button>
+            </div>
+          <li class="lm-tweetlord"><span class="label label-info tweetlord-btn" data-toggle="collapse" data-target="#tweetlord-dd">Tweetlord</span></li>
+            <div id="tweetlord-dd" class="collapse lm-dd">
+              <button class="tweetlord-new-btn btn btn-primary">New</button>
+              <button class="tweetlord-join-btn btn btn-info">Join</button>
+            </div>
+          <li class="lm-options"><span class="label label-info options-btn">Options&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp</span></li>
+        </ul>
+      </div>
+      <!-- Imposter -->
+      <div class="imposter-new-view new-view">
+        <button class="btn btn-default back-btn">Back</button>
+        <h4 class="nameprompt-header" align="center">What's your name?</h4>
+        <form action="/scripts/makeGame" method="post" name="name-prompt" id="name-prompt" class="form-horizontal">
+          <input type="hidden" name="gameFlag" value="imposterNew">
+          <input type="hidden" name="gameTitle" value="imposter">
+          <input type="text" name="namepromptM" class="form-control" id="nameprompt-input" maxlength="16" placeholder="16 characters max" autofocus required>
+          <div class="make-submit">
+            <button type="submit" name="make-game-submit" class="btn btn-primary">Start Game!</button>
+          </div>
+        </form>
+      </div>
+      <div class="imposter-join-view join-view">
+        <button class="btn btn-default back-btn">Back</button>
+        <form action="/scripts/joinGame" method="post" name="gamecode-prompt" id="gamecode-prompt" class="form-horizontal">
+          <input type="hidden" name="gameFlag" value="imposterJoin">
+          <h4 class="nameprompt-header" align="center">Choose a name</h4>
+          <input type="text" name="namepromptJ" class="form-control" id="nameprompt-input" maxlength="16" placeholder="16 characters max" autofocus required>
+          <h4 class="nameprompt-header" align="center">Enter game code</h4>
+          <input type="text" name="gameprompt" class="form-control" id="gameprompt-input" maxlength="6" autofocus required>
+          <div class="join-submit">
+            <button type="submit" name="join-game-submit" class="btn btn-primary">Join Game!</button>
+          </div>
+        </form>
+      </div>
+      <!-- Options -->
+      <div class="options-view">
+        <button class="btn btn-default back-btn">Back</button>
+        <h3 align="center">Eh, no options yet m9</h3>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+<script type="text/javascript">
+$(document).ready(function() {
+
+	var gameChoice = 0;
+
+	//Button listeners
+	$('.imposter-new-btn').on('click', function() {
+		lmChoice = 1;
+		$('.menu-view').fadeOut(function() {
+			$('.imposter-new-view').fadeIn();
+		});
+	});
+
+	$('.imposter-join-btn').on('click', function() {
+		lmChoice = 2;
+		$('.menu-view').fadeOut(function() {
+			$('.imposter-join-view').fadeIn();
+		});
+	});
+
+  $('.tweetlord-new-btn').on('click', function() {
+    lmChoice = 2;
+    $('.menu-view').fadeOut(function() {
+      $('.tweetlord-new-view').fadeIn();
+    });
+  });
+
+  $('.tweetlord-join-btn').on('click', function() {
+    lmChoice = 2;
+    $('.menu-view').fadeOut(function() {
+      $('.tweetlord-join-view').fadeIn();
+    });
+  });
+
+	$('.options-btn').on('click', function() {
+		lmChoice = 3;
+		$('.menu-view').fadeOut(function() {
+			$('.options-view').fadeIn();
+		});
+        socket.emit('bclick');
+	});
+
+	$('.back-btn').on('click', function() {
+		lmChoice = 0;
+		if($('.new-view').css('display') != 'none') {
+			$('.new-view').fadeOut(function() {
+				$('.menu-view').fadeIn();
+			});
+		} else if($('.join-view').css('display') != 'none') {
+			$('.join-view').fadeOut(function() {
+				$('.menu-view').fadeIn();
+			});
+		} else if($('.options-view').css('display') != 'none') {
+			$('.options-view').fadeOut(function() {
+				$('.menu-view').fadeIn();
+			});
+		}
+	});
+});
+</script>

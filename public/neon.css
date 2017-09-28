@@ -1,0 +1,300 @@
+/* === BASE ============================================================================================================= */
+html {
+  height: 100%;
+  width: 100%;
+  background-color: #595959;
+}
+
+body {
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  min-height: 100%;
+  background-color: #595959;
+}
+
+header {
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  height: 51px;
+}
+
+.valign {
+  min-height: 100%;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+}
+
+/* === MAIN PAGE ============================================================================================================= */
+.btn {
+  font-family: "Source Sans Pro";
+}
+
+.top-banner {
+  padding: 0;
+  margin: 0;
+  height: 100px;
+  width: 100%;
+}
+
+.banner-jt {
+  height: 100px;
+  width: 100%;
+  background-color: #4d4d4d;
+}
+
+.banner-title {
+  margin: 0;
+  padding-top: 6%;
+  font-family: "Lobster", sans-serif;
+  font-size: 300%;
+  color: white;
+}
+
+.btitle1 {
+  color: #00b8e6;
+}
+
+.nav * {
+  font-family: "Source Sans Pro";
+}
+
+#about-modal {
+  margin-top: 20%;
+}
+
+#game-container {
+  padding: 0;
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  background-color: #595959;
+}
+
+.game-content {
+  height: 100%;
+  width: 100%;
+  background-color: #595959;
+}
+
+.lobby-content {
+  height: 100%;
+  width: 100%;
+  background-color: #595959;
+}
+
+.menu-view {
+  margin: auto;
+  height: 100%;
+  width: 40%;
+  vertical-align: middle;
+}
+
+.lobby-menu {
+  padding-top: 20%;
+  padding-left: 0;
+  margin: auto;
+  list-style-type: none;
+  vertical-align: middle;
+}
+
+.lobby-menu li {
+  font-size: 250%;
+  font-family: "Source Sans Pro";
+  color: #33d6ff;
+  padding-bottom: 10%;
+  vertical-align: middle;
+}
+
+.newprompt-view {
+  display: none;
+  height: 100%;
+  width: 100%;
+  vertical-align: middle;
+  margin: 0;
+}
+
+.nameprompt-header {
+  margin-top: 10%;
+  margin-bottom: 8%;
+  font-family: "Source Sans Pro";
+  font-size: 200%;
+  color: white;
+}
+
+#name-prompt, #gamecode-prompt {
+  width: 80%;
+  margin: auto;
+}
+
+.make-submit, .join-submit {
+  width: 100px;
+  margin: auto;
+  margin-top: 10%;
+}
+
+.joinprompt-view {
+  display: none;
+  width: 100%;
+  height: 100%;
+  vertical-align: middle;
+  margin: 0;
+}
+
+.options-view {
+  display: none;
+}
+
+.back-btn {
+  margin-top: 2%;
+  margin-left: 2%;
+}
+
+/* === BODY CONTENT ============================================================================================================= */
+.transition-content {
+  display: hidden;
+  position: relative;
+  background: linear-gradient(to right, #666666, #808080, #666666);
+  height: 50%;
+}
+
+.ph0-content {
+  position: relative;
+  background: linear-gradient(to right, #666666, #808080, #666666);
+  height: 50%;
+}
+
+.ph0-header {
+  margin-top: 0;
+  padding-top: 5%;
+  margin-left: 10%;
+  color: white;
+}
+
+.ph0-gc-label {
+    margin-bottom: 0.5em;
+}
+
+.ph0-tick-label {
+    margin-top: 2.5em;
+    margin-bottom: 0.5em;
+}
+
+.ph0-tick {
+    margin-left: 1em;
+}
+
+.ph0-gc {
+  width: 90%;
+  margin-bottom: 10px;
+  font-size: 100%;
+  color: white;
+}
+
+.ph0-codespan {
+  font-size: 1.2em;
+  margin-left: 0;
+}
+
+.ph0-playerlist {
+  width: 90%;
+  list-style-type: decimal;
+  margin-left: 4%;
+  padding-left: 10%;
+  padding-top: 3%;
+  padding-bottom: 3%;
+  border: 3px solid #007399;
+  border-radius: 16px;
+  background: linear-gradient(#4dd2ff, #80dfff, #4dd2ff);
+}
+
+.ph0-playerlist li {
+    padding-bottom: 3%;
+    margin-left: 1.5%;
+    font-family: "Erica One";
+    font-size: 120%;
+}
+
+.ph0-listitem {
+  padding-left: 1%;
+  padding-bottom: 5%;
+  font-size: 160%;
+}
+
+.ph0-timer {
+  width: 5em;
+  height: 4em;
+  position: absolute;
+  right: 11%;
+  top: 13em;
+  /*background: linear-gradient(#004d4d, #008080, #004d4d);
+  border: 2px solid #003333;
+  border-radius: 5px;*/
+}
+
+.ph0-tick {
+  padding: 0em 0.25em 0.2em 0.25em;
+  margin-bottom: 0.1em;
+  font-size: 300%;
+  color: white;
+  border: 2px solid #003333;
+}
+
+.postpone-btn, .impatient-btn {
+    margin-top: 1.2em;
+}
+
+.transition-content, .ph1-postcontent {
+  display: none;
+  position: relative;
+  background: linear-gradient(to right, #666666, #808080, #666666);
+  height: 50%;
+}
+
+.ph1-content, .ph2-content, .ph3-content, .ph4-content, .ph5-content {
+  display: none;
+  position: relative;
+  background: linear-gradient(to right, #666666, #808080, #666666);
+  height: 50%;
+}
+
+.transition-logo {
+  margin: auto;
+}
+
+.ph1-tweeter {
+  width: 50%;
+  margin: auto;
+  margin-bottom: 20px;
+}
+
+/* === BUTTONS ============================================================================================================= */
+.btn-area {
+  height: 30%;
+  display: table;
+  margin: auto;
+}
+
+.ph0-btn-area {
+  width: 100%;
+}
+
+.ph0-btns {
+  width: 100%;
+  margin: 0;
+  margin-top: 5%;
+  padding: 0;
+  list-style-type: none;
+  font-size: 150%;
+}
+
+.ph0-btns li {
+  margin: auto;
+  margin-top: 15px;
+}
+
+.postpone-btn {
+  padding-right: 3em;
+}

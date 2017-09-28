@@ -1,0 +1,81 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+  <title>JD'S GAMESUITE</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <link rel="stylesheet" href="xenon.css" title="Main Look">
+  <link href="https://fonts.googleapis.com/css?family=Titillium+Web" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Fascinate+Inline" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Erica+One" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Lobster" rel="stylesheet">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <!-- Optional theme -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+  <!-- Latest compiled and minified JavaScript -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div class="top-banner">
+    <div class="banner-jt">
+      <h1 class="banner-title" align="center"><span class="imposter-title">Imposter</span></h1>
+    </div>
+  </div>
+  <div class="container-fluid" id="game-container">
+    <header>
+      <nav class="navbar navbar-inverse navbar-static-top">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="http://localhost:8081/">Home</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="#">Home</a></li>
+            <li><a href="" data-toggle="modal" data-target="#about-modal">About</a></li>
+            <li><a href="#">Quit</a></li>
+          </ul>
+        </div>
+      </nav>
+    </header>
+    <div id="about-modal" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title">How to play Imposter</h4>
+          </div>
+          <div class="modal-body">
+            <p>You have a new identity: either you are now a different person in the room or you're the randomly
+            chosen imposter!</p><br>
+            <h5>If you're <strong>not</strong> the Imposter:</h5>
+            <p>You have a new identity.  Try to act as close as possible to the person whose name is on your screen.
+            You also have a special scenario or condition that complicates the matter, but remember: you should react in
+            the same way as your person would.  In other words, don't be yourself.  Your goal is to find the person in the
+            room who doesn't have a name printed on their screen before the time runs out.  Feel free to interrogate, but
+            if you're not clever enough, the Imposter will catch on and find out who isn't being impersonated.  If they do
+            that and thoroughly convince you until the time runs out, the Imposter wins.</p><br>
+            <h5>If you're the Imposter:</h5>
+            <p>Blend in!  You may not have an identity printed on your screen, but there is someone in the room who isn't
+            being impersonated by someone else, and your job is to find out who that is, impersonate them, and convince your
+            friends with sound alibis that you are not the Imposter.  Do this until time runs out and you win.</p><br>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+</body>
+</html>
+<script type="text/javascript">
+
+</script>
