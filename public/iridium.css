@@ -9,6 +9,7 @@ body {
   padding: 0;
   margin: 0;
   width: 100%;
+  height: 100%;
   min-height: 100%;
   background-color: #595959;
 }
@@ -42,19 +43,24 @@ header {
 .banner-jt {
   height: 100px;
   width: 100%;
-  background-color: #4d4d4d;
+  background-color: #f2f2f2;
 }
 
 .banner-title {
   margin: 0;
-  padding-top: 0.5em;
-  font-family: "Lobster", sans-serif;
+  padding-top: 6%;
   font-size: 300%;
   color: white;
+  font-family: "Anton", sans-serif;
 }
 
 .btitle1 {
   color: #00b8e6;
+}
+
+.imposter-titlespan {
+  font-family: "Anton", sans-serif;
+  color: black;
 }
 
 .nav * {
@@ -70,7 +76,7 @@ header {
   position: absolute;
   height: 100%;
   width: 100%;
-  background-color: #595959;
+  background-color: #e6e6e6;
 }
 
 .game-content {
@@ -85,83 +91,8 @@ header {
   background-color: #595959;
 }
 
-.menu-view {
-  margin: auto;
-  height: 100%;
-  width: 40%;
-  vertical-align: middle;
-}
-
-.lobby-menu {
-  padding-top: 20%;
-  padding-left: 0;
-  margin: auto;
-  list-style-type: none;
-  vertical-align: middle;
-}
-
-.lobby-menu li {
-  font-size: 250%;
-  font-family: "Source Sans Pro";
-  color: #33d6ff;
-  padding-bottom: 10%;
-  vertical-align: middle;
-}
-
-.lm-dd {
-  margin-bottom: 10px;
-}
-
-.imposter-new-btn, .tweetlord-new-btn {
-  
-}
-
-.newprompt-view {
-  display: none;
-  height: 100%;
-  width: 100%;
-  vertical-align: middle;
-  margin: 0;
-}
-
-.nameprompt-header {
-  margin-top: 10%;
-  margin-bottom: 8%;
-  font-family: "Source Sans Pro";
-  font-size: 200%;
-  color: white;
-}
-
-#name-prompt, #gamecode-prompt {
-  width: 80%;
-  margin: auto;
-}
-
-.make-submit, .join-submit {
-  width: 100px;
-  margin: auto;
-  margin-top: 10%;
-}
-
-.joinprompt-view {
-  display: none;
-  width: 100%;
-  height: 100%;
-  vertical-align: middle;
-  margin: 0;
-}
-
-.options-view {
-  display: none;
-}
-
-.back-btn {
-  margin-top: 2%;
-  margin-left: 2%;
-}
-
 /* === BODY CONTENT ============================================================================================================= */
-.transition-content {
+.transition-view {
   display: none;
   position: relative;
   background: linear-gradient(to right, #666666, #808080, #666666);
@@ -178,8 +109,8 @@ header {
   position: relative;
 }
 
-.imposter-new-btn, .tweetlord-new-btn {
-  width: 4em;
+.imposter-new-btn {
+  margin-right: 15px;
 }
 
 .imposter-join-view {
@@ -188,30 +119,3 @@ header {
 }
 
 /* === BUTTONS ============================================================================================================= */
-.btn-area {
-  height: 30%;
-  display: table;
-  margin: auto;
-}
-
-.ph0-btn-area {
-  width: 100%;
-}
-
-.ph0-btns {
-  width: 100%;
-  margin: 0;
-  margin-top: 5%;
-  padding: 0;
-  list-style-type: none;
-  font-size: 150%;
-}
-
-.ph0-btns li {
-  margin: auto;
-  margin-top: 15px;
-}
-
-.postpone-btn {
-  padding-right: 3em;
-}

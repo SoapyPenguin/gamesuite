@@ -1,13 +1,11 @@
 <!DOCTYPE HTML>
 <html lang="en">
 <head>
-  <title>JD'S GAMESUITE</title>
+  <title>IMPOSTER - JDGS</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <link rel="stylesheet" href="xenon.css" title="Main Look">
-  <link href="https://fonts.googleapis.com/css?family=Titillium+Web" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css?family=Fascinate+Inline" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css?family=Erica+One" rel="stylesheet">
+  <link rel="stylesheet" href="iridium.css" title="Imposter Look">
+  <link href="https://fonts.googleapis.com/css?family=Anton" rel="stylesheet"> 
   <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Lobster" rel="stylesheet">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
@@ -21,10 +19,10 @@
 <body>
   <div class="top-banner">
     <div class="banner-jt">
-      <h1 class="banner-title" align="center"><span class="imposter-title">Imposter</span></h1>
+      <h1 class="banner-title" align="center"><span class="imposter-titlespan">Imposter</span></h1>
     </div>
   </div>
-  <div class="container-fluid" id="game-container">
+  <div id="game-container">
     <header>
       <nav class="navbar navbar-inverse navbar-static-top">
         <div class="navbar-header">
@@ -53,29 +51,84 @@
             <h4 class="modal-title">How to play Imposter</h4>
           </div>
           <div class="modal-body">
-            <p>You have a new identity: either you are now a different person in the room or you're the randomly
-            chosen imposter!</p><br>
-            <h5>If you're <strong>not</strong> the Imposter:</h5>
-            <p>You have a new identity.  Try to act as close as possible to the person whose name is on your screen.
-            You also have a special scenario or condition that complicates the matter, but remember: you should react in
-            the same way as your person would.  In other words, don't be yourself.  Your goal is to find the person in the
-            room who doesn't have a name printed on their screen before the time runs out.  Feel free to interrogate, but
-            if you're not clever enough, the Imposter will catch on and find out who isn't being impersonated.  If they do
-            that and thoroughly convince you until the time runs out, the Imposter wins.</p><br>
-            <h5>If you're the Imposter:</h5>
-            <p>Blend in!  You may not have an identity printed on your screen, but there is someone in the room who isn't
-            being impersonated by someone else, and your job is to find out who that is, impersonate them, and convince your
-            friends with sound alibis that you are not the Imposter.  Do this until time runs out and you win.</p><br>
-          </div>
+            <p>Imposter is basically a clone of "Spyfall", but with different, more diverse scenarios.</p><br>
+            <h5>How to Play</h5>
+            <p>When the game starts, you are either shown a special scenario and your role in said scenario or you
+            are the randomly-chosen Imposter!</p><br>
+            <p>If you're <strong>not</strong> the Imposter, your job is to find who is in the same scenario as you
+            without tipping off the Imposter, who can guess the scenario from a list if you're too specific. Take turns
+            asking questions, and if someone seems like they don't belong, accuse them of being the Imposter.  If the
+            players <strong>unanimously</strong> decide that one person is the Imposter, the game ends.  If you've
+            correctly identified the Imposter, you win, but if you chose the wrong person, the Imposter wins.  If the time
+            runs out, a vote is immediately called.</p><br>
+            <p>If you're the Imposter, you've gotta blend in! Use deductive reasoning to choose the specific scenario that
+            your friends are in and you win. You can also win by letting the timer run out and convincing the rest of the players
+            to vote for someone else.</p>
+          </div> 
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
           </div>
         </div>
       </div>
     </div>
-    
+    <div class="imposter-content">
+      <div class="imposter-lobby-view">
+        <ul class="il-player-list">
+          <li class="il-li"></li>
+          <li class="il-li"></li>
+          <li class="il-li"></li>
+          <li class="il-li"></li>
+          <li class="il-li"></li>
+          <li class="il-li"></li>
+          <li class="il-li"></li>
+          <li class="il-li"></li>
+          <li class="il-li"></li>
+          <li class="il-li"></li>
+        </ul>
+        <div class="imposter-lobby-btns">
+          <button class="btn btn-lg btn-block">Postpone</button>
+          <button class="btn btn-lg btn-block">Hurry Up</button>
+        </div>
+      </div>
+      <div class="imposter-game-view">
+        <div class="imposter-role-prompt">
+        </div>
+        <div class="imposter-scenario-prompt">
+        </div>
+        <div class="imposter-list-area">
+          <ul class="imposter-scenario-list">
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
 <script type="text/javascript">
+$(document).ready(function() {
 
+  //Setup
+    var localip = 'ws://localhost:8081/';
+    var gameState = {};
+    var playerSlot = 0;
+    
+    var socket = io(localip);
+    socket.emit('sockettest', {
+        welcome: "Socket start!"
+    });
+
+    socket.on('setup', function(data) {
+        console.log("Setting up...");
+        gameState = data.gameState;
+        
+    });
+    
+    socket.on('playerJoin', function(data) {
+        console.log(data.name + " has joined as P" + data.slot);
+        for(var i = 1; i < 7; i++) {
+            $('.ph0-listitem' + i).text(data.gameState.players[i]);
+        }
+    });
+
+});
 </script>

@@ -70,8 +70,10 @@
         <ul class="lobby-menu">
           <li class="lm-imposter"><span class="label label-info imposter-btn" data-toggle="collapse" data-target="#imposter-dd" style="padding-right:30px;">Imposter</span></li>
             <div id="imposter-dd" class="collapse lm-dd">
-              <button class="imposter-new-btn btn btn-primary">New</button>
-              <button class="imposter-join-btn btn btn-info">Join</button>
+              <div class="btn-group">
+                <button class="imposter-new-btn btn btn-primary">New</button>
+                <button class="imposter-join-btn btn btn-info">Join</button>
+              </div>
             </div>
           <li class="lm-tweetlord"><span class="label label-info tweetlord-btn" data-toggle="collapse" data-target="#tweetlord-dd">Tweetlord</span></li>
             <div id="tweetlord-dd" class="collapse lm-dd">
@@ -86,7 +88,6 @@
         <button class="btn btn-default back-btn">Back</button>
         <h4 class="nameprompt-header" align="center">What's your name?</h4>
         <form action="/scripts/makeGame" method="post" name="name-prompt" id="name-prompt" class="form-horizontal">
-          <input type="hidden" name="gameFlag" value="imposterNew">
           <input type="hidden" name="gameTitle" value="imposter">
           <input type="text" name="namepromptM" class="form-control" id="nameprompt-input" maxlength="16" placeholder="16 characters max" autofocus required>
           <div class="make-submit">
@@ -97,7 +98,7 @@
       <div class="imposter-join-view join-view">
         <button class="btn btn-default back-btn">Back</button>
         <form action="/scripts/joinGame" method="post" name="gamecode-prompt" id="gamecode-prompt" class="form-horizontal">
-          <input type="hidden" name="gameFlag" value="imposterJoin">
+          <input type="hidden" name="gameTitle" value="imposter">
           <h4 class="nameprompt-header" align="center">Choose a name</h4>
           <input type="text" name="namepromptJ" class="form-control" id="nameprompt-input" maxlength="16" placeholder="16 characters max" autofocus required>
           <h4 class="nameprompt-header" align="center">Enter game code</h4>
