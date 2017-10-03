@@ -46,6 +46,8 @@ function startGame(gameName) {
             starttime: new Date().toISOString().slice(0, 19).replace('T', ' '),
             endtime: undefined,
             postpones: 0,
+            location: "undefined",
+            roles: {1:99,2:99,3:99,4:99,5:99,6:99,7:99,8:99,9:99,10:99}
         }
         console.log("New Imposter gameState created");
         return gameState;
@@ -86,12 +88,12 @@ gamesuite.get('/tweetlord/:gameCode', function(req, res) {
 });
 
 gamesuite.get('/imposter/:gameCode', function(req, res) {
-    if(req.url == "/imposter/xenon.css") {
+    if(req.url == "/imposter/iridium.css") {
     res.set("Content-Type", "text/css");
     if(pathmode == 0) {
-      res.sendFile(path.resolve('/Programs/Nodejs/sync/public/xenon.css'));
+      res.sendFile(path.resolve('/Programs/Nodejs/sync/public/iridium.css'));
     } else if(pathmode == 1) {
-      res.sendFile(path.resolve('/home/hydra/Apps/gamesuite/public/xenon.css'));
+      res.sendFile(path.resolve('/home/hydra/Apps/gamesuite/public/iridium.css'));
     }
   } else {
     res.set("Content-Type", "text/html");
@@ -115,37 +117,15 @@ gamesuite.post('/scripts/makeGame', function(req, res) {
 });
 
 gamesuite.post('/scripts/joinGame', function(req, res) {
-    //Check for game
-    console.log("Checking");
     var cgc = req.body.gameprompt;
-    var gameFound = false;
+    var gameTitle = req.body.gameTitle;
     var myGame = getGame(cgc);
-    console.log(myGame);
-    return;
-    // for (var g in GAMELIST) {
-    //     if(!GAMELIST.hasOwnProperty(g)) {
-    //         continue;
-    //     } else {
-    //         if(g.code == cgc.toUpperCase()) {
-    //             //Join
-    //             gameFound = true;
-    //             var gameFull = true;
-    //             for (var p in g.players) {
-    //                 if(p == "") {
-    //                     gameFull = false;
-    //                     g.players[p] = req.body.namepromptJ;
-    //                     console.log("Player " + req.body.namepromptJ + " joined game " + cgc);
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
-    if(!gameFound) {
+    if(myGame == "GameNotFound") {
         alert("No game exists with that game code");
+        return;
     }
-    if(gameFull) {
-        alert("Sorry, that game is full");
-    }
+    //Check if full
+    
     //Add name
     for(var i = 0; i < 6; i++) {
         //Be original
@@ -249,8 +229,12 @@ function generateGC() {
 }
 
 function getGame(gc) {
-    var myGame = GAMELIST.gc;
-    return myGame;
+    if(GAMELIST.hasOwnProperty(gc)) {
+        var myGame = GAMELIST.gc;
+        return myGame;
+    } else {
+        return "GameNotFound";
+    }
 }
 
 function isEmpty(obj) {
@@ -285,3 +269,6 @@ function restartApp() {
         console.log(gameState);
     });
 }
+
+/*******************************************************************************************************************************/
+//Imposter functions
