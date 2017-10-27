@@ -15,6 +15,7 @@
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
   <!-- Latest compiled and minified JavaScript -->
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+  <script src="/scripts/socket.io.js"></script>
 </head>
 <body>
   <div class="top-banner">
@@ -74,17 +75,21 @@
     <div class="imposter-content">
       <div class="imposter-lobby-view">
         <ul class="il-player-list">
-          <li class="il-li"></li>
-          <li class="il-li"></li>
-          <li class="il-li"></li>
-          <li class="il-li"></li>
-          <li class="il-li"></li>
-          <li class="il-li"></li>
-          <li class="il-li"></li>
-          <li class="il-li"></li>
-          <li class="il-li"></li>
-          <li class="il-li"></li>
+          <li class="il-li1"></li>
+          <li class="il-li2"></li>
+          <li class="il-li3"></li>
+          <li class="il-li4"></li>
+          <li class="il-li5"></li>
+          <li class="il-li6"></li>
+          <li class="il-li7"></li>
+          <li class="il-li8"></li>
+          <li class="il-li9"></li>
+          <li class="il-li10"></li>
         </ul>
+        <div class="il-timer-area">
+          <h4 class="il-ta-prompt">Starting in:</h4>
+          <span class="il-timer">(loading...)</span>
+        </div>
         <div class="imposter-lobby-btns">
           <button class="btn btn-lg btn-block">Postpone</button>
           <button class="btn btn-lg btn-block">Hurry Up</button>
@@ -104,30 +109,51 @@
   </div>
 </body>
 </html>
-<script type="text/javascript">
+<script>
 $(document).ready(function() {
 
-  //Setup
+    //Globals
     var localip = 'ws://localhost:8081/';
     var gameState = {};
     var playerSlot = 0;
-    
+    var socketID = 0;
+    var gc = window.location.href.split("/")[4];
     var socket = io(localip);
-    socket.emit('sockettest', {
-        welcome: "Socket start!"
-    });
 
+    //Setup
     socket.on('setup', function(data) {
-        console.log("Setting up...");
-        gameState = data.gameState;
-        
+        socketID = data.socketId;
+        socket.emit('sendGC', {
+            gc: gc
+        });
     });
     
     socket.on('playerJoin', function(data) {
         console.log(data.name + " has joined as P" + data.slot);
-        for(var i = 1; i < 7; i++) {
-            $('.ph0-listitem' + i).text(data.gameState.players[i]);
+        for(var i = 1; i <= 10; i++) {
+            $('.il-li' + i).text(data.gameState.players[i]);
+            if(data.gameState.players[i] == data.name) {
+                playerSlot = i;
+            }
         }
+    });
+
+    socket.on('setupPh0', function(data) {
+        gameState = data.gameState;
+        $('.il-timer').text(data.gameState.timers[0]);
+    });
+
+    //Ticks
+    socket.on('tickPh0', function(data) {
+        gameState = data.gameState;
+        var t = data.gameState.timers[0];
+        $('.il-timer').text(t);
+        console.log("tick");
+    });
+
+    //Misc
+    socket.on('tooManyPostpones', function(data) {
+        alert("Whoa there, cowboy.  The show must go on.");
     });
 
 });

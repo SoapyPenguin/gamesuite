@@ -80,7 +80,7 @@
               <button class="tweetlord-new-btn btn btn-primary">New</button>
               <button class="tweetlord-join-btn btn btn-info">Join</button>
             </div>
-          <li class="lm-options"><span class="label label-info options-btn">Options&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp</span></li>
+          <li class="lm-options"><span class="label label-info options-btn">Options&nbsp&nbsp&nbsp&nbsp&nbsp</span></li>
         </ul>
       </div>
       <!-- Imposter -->
@@ -156,7 +156,6 @@ $(document).ready(function() {
 		$('.menu-view').fadeOut(function() {
 			$('.options-view').fadeIn();
 		});
-        socket.emit('bclick');
 	});
 
 	$('.back-btn').on('click', function() {
