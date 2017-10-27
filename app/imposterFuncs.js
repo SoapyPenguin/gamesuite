@@ -1,4 +1,4 @@
-modules.exports = {
+module.exports = {
 	assignRoles: function(gameState) {
 	    /**Scenarios
 	        -Animal Hospital
@@ -21,7 +21,6 @@ modules.exports = {
 	        -Hogwarts Feast
 	        -High-Stakes Poker Game
 	        -Haunted House
-	        -
 	    **/
 	    var scenarios = {
 	        0: {

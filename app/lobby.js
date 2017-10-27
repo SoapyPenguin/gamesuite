@@ -4,6 +4,7 @@ var express = require('express');
 var gamesuite = express();
 var serv = require('http').Server(gamesuite);
 var path = require('path');
+var url = require('url');
 var bodyParser = require('body-parser');
 gamesuite.use(bodyParser.urlencoded({ extended: false }));
 gamesuite.use(bodyParser.json());
@@ -18,6 +19,7 @@ console.log("Loading...");
 function startGame(gameName) {
     if(gameName == "tweetlord") {
         var gameState = {
+            title: "tweetlord",
             inProgress: false,
             code: generateGC(),
             players: {1:"",2:"",3:"",4:"",5:"",6:""},
@@ -38,9 +40,11 @@ function startGame(gameName) {
         return gameState;
     } else if(gameName == "imposter") {
         var gameState = {
+            title: "imposter",
             inProgress: false,
             code: generateGC(),
             players: {1:"",2:"",3:"",4:"",5:"",6:"",7:"",8:"",9:"",10:""},
+            timers: {0:60,1:360},
             round: 0,
             phase: 0,
             starttime: new Date().toISOString().slice(0, 19).replace('T', ' '),
@@ -114,6 +118,10 @@ gamesuite.post('/scripts/makeGame', function(req, res) {
     GAMELIST[newGame.code] = newGame;
     res.writeHead(301, { Location: '/' + gameTitle + '/' + newGame.code });
     res.end();
+    emitToGameC('playerJoin', newGame.code, {
+        name: req.body.namepromptM,
+        slot: 1
+    });
 });
 
 gamesuite.post('/scripts/joinGame', function(req, res) {
@@ -125,99 +133,191 @@ gamesuite.post('/scripts/joinGame', function(req, res) {
         return;
     }
     //Check if full
-    
+    var isFull = true;
+    for(var p in myGame.players) {
+        if(p == "") {
+            isFull = false;
+            break;
+        }
+    }
+    if(isFull) {
+        alert("Sorry, that game is full");
+        return;
+    }
     //Add name
     for(var i = 0; i < 6; i++) {
         //Be original
         if(myGame.players[i] == req.body.namepromptJ) {
-            req.body.namepromptJ = req.body.namepromptJ + " 2";
+            req.body.namepromptJ = "Other " + req.body.namepromptJ;
         }
         if(myGame.players[i] == "") {
             myGame.players[i] = req.body.namepromptJ;
             break;
         }
     }
-    res.writeHead(301, { Location: '/imposter/' + gameState.code });
+    res.writeHead(301, { Location: '/' + gameTitle + '/' + cgc });
     res.end();
-    emitToAll('playerJoin');
-});
-
-/*******************************************************************************************************************************/
-//Listen
-serv.listen(8081, function() {
-  console.log("GAMESUITE START!");
 });
 /*******************************************************************************************************************************/
 //Sockets
 var io = require('socket.io')(serv);
 io.sockets.on('connection', function(socket) {
+    //Connection
     var slen = Object.keys(SOCKETLIST).length;
-    socket.tlid = slen + 1;
-    socket.name = gameState.players[socket.tlid];
-    SOCKETLIST[socket.tlid] = socket;
-    console.log("Socket connection initialized: socket " + socket.tlid);
+    socket.id = slen + 1;
+    socket.gameState = null;
+    SOCKETLIST[socket.id] = socket;
+    console.log("Socket connection initialized: socket " + socket.id);
 
+    //Test ===========================================================
     socket.on('sockettest', function(data) {
         console.log(data.welcome);
     });
-    
+    //----------------------------------------------------------------
+
+    //Setup ==========================================================
     socket.emit('setup', {
-        gameState: gameState,
-        socketId: socket.tlid
+        socketId: socket.id
     });
 
+    socket.on('sendGC', function(data) {
+        socket.gc = data.gc;
+        socket.gameState = getGame(socket.gc);
+        console.log("Socket " + socket.id + " has joined game " + socket.gc);
+        // socket.emit('playerJoin', {
+        //     gameState: socket.gameState
+        // });
+        if(socket.gameState.phase == 0) {
+            socket.emit('setupPh0', {
+                gameState: socket.gameState
+            });
+        }
+    });
+    //----------------------------------------------------------------
+
+    //Disconnection ==================================================
     socket.on('disconnect', function() {
-        //Remove socket
-        delete SOCKETLIST[socket.tlid];
         //Remove player
-        gameState.players[socket.tlid] = "*disconnected*";
-        //Deprecated: move players down
-        // if(gameState.players[socket.tlid + 1] != "") {
-        //     for(var i = (socket.tlid + 1); i < 7; i++) {
-        //         gameState.players[i - 1] = gameState.players[i];
-        //         gameState.players[i] = "";
-        //     }
-        // }
-        //Restart app if no players left
+        socket.gameState.players[socket.id] = "*disconnected*";
+        //Move players down
+        if(socket.gameState.players[socket.id + 1] != "") {
+            for(var i = (socket.id + 1); i < 7; i++) {
+                if(socket.gameState.title == "imposter") {
+                    socket.gameState.players[i - 1] = socket.gameState.players[i];
+                    socket.gameState.players[i] = "";
+                    socket.gameState.roles[i - 1] = socket.gameState.roles[i];
+                    socket.gameState.roles[i] = "";
+                }
+            }
+        }
+        //Remove game if no players left
         var isEmpty = true;
-        for(var i = 1; i < 7; i++) {
-            if((gameState.players[i] != "") && (gameState.players[i] != "*disconnected*")) {
+        for(var i = 1; i < 11; i++) {
+            if((socket.gameState.players[i] != "") && (socket.gameState.players[i] != "*disconnected*")) {
                 isEmpty = false;
             }
         }
         if(isEmpty == true) {
-            restartApp();
+            delete GAMELIST[socket.gameState.code];
         }
-        console.log("Socket " + socket.tlid + " disconnected");
+        //Remove socket
+        delete SOCKETLIST[socket.id];
+        console.log("Socket " + socket.id + " disconnected");
     });
+    //----------------------------------------------------------------
     
-    //Buttons
+    //Buttons ========================================================
     socket.on('postpone', function() {
-        if(gameState.postpones > 4) {
+        if(socket.gameState.postpones > 4) {
             socket.emit('tooManyPostpones');
             return;
         }
-        gameState.postpones = gameState.postpones + 1;
-        gameState.timers[0] = gameState.timers[0] + 15;
+        socket.gameState.postpones = socket.gameState.postpones + 1;
+        socket.gameState.timers[0] = socket.gameState.timers[0] + 15;
     });
     
     socket.on('impatience', function() {
-        gameState.timers[0] = gameState.timers[0] - 1;
+        socket.gameState.timers[0] = socket.gameState.timers[0] - 1;
     });
+    //----------------------------------------------------------------
 
-    //Pausing
+    //Pausing ========================================================
     socket.on('pause', function() {
-        gameState.inProgress = false;
-        console.log("Game paused");
+        socket.gameState.inProgress = false;
+        console.log("Game paused (" + socket.id);
     });
 
     socket.on('unpause', function() {
-        gameState.inProgress = true;
+        socket.gameState.inProgress = true;
         console.log("Game resumed");
     });
+    //----------------------------------------------------------------
+
+    //Game ticks =====================================================
+
+    setInterval(function() {
+        for(var game in GAMELIST) {
+            g = GAMELIST[game];
+            //IMPOSTER
+            if(g.gameTitle == "imposter" && g.inProgress == true) {
+                if(g.phase == 0) {
+                    g.timers[0] -= 1;
+                    socket.emit('tickPh0', {
+                        gameState: g
+                    });
+                    if(g.timers[0] < 1) {
+                        g.phase = 1;
+                        socket.emit('setupPh1', {
+                            gameState: g
+                        });
+                    }
+                } else if(g.phase == 1) {
+                    g.timers[1] -= 1;
+                    if(g.timers[1] < 1) {
+                        g.phase = 2;
+                        socket.emit('gameOver', {
+                            gameState: g
+                        });
+                    }
+                }
+            }
+        }
+    }, 1000);
+
+    //----------------------------------------------------------------
 });
 /*******************************************************************************************************************************/
 //Utility functions
+function emitToGame(event, gc) {
+    var found = false;
+    for(var s in SOCKETLIST) {
+        var socket = SOCKETLIST[s];
+        if(socket.gc == gc) {
+            found = true;
+            socket.emit(event, {
+                gameState: getGame(gc)
+            });
+        }
+    }
+    if(found == false) {
+        console.log("Error in emitToGame(" + event + "): unable to find game " + gc);
+    }
+}
+
+function emitToGameC(event, gc, data) {
+    var found = false;
+    for(var s in SOCKETLIST) {
+        var socket = SOCKETLIST[s];
+        if(socket.gc == gc) {
+            found = true;
+            socket.emit(event, data);
+        }
+    }
+    if(found == false) {
+        console.log("Error in emitToGameC(" + event + "): unable to find game " + gc);
+    }
+}
+
 function generateGC() {
     var gcchars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
     var gc = "";
@@ -225,14 +325,24 @@ function generateGC() {
         var rc = gcchars.charAt(Math.floor(Math.random() * 36));
         gc = gc + rc;
     }
+    if(GAMELIST.hasOwnProperty(gc)) {
+        generateGC();
+        return;
+    }
     return gc;
 }
 
 function getGame(gc) {
-    if(GAMELIST.hasOwnProperty(gc)) {
-        var myGame = GAMELIST.gc;
-        return myGame;
-    } else {
+    var found = 0;
+    var keys = Object.keys(GAMELIST);
+    for(var i=0; i<keys.length; i++) {
+        var g = GAMELIST[keys[i]];
+        if(g.code == gc) {
+            found = 1;
+            return g;
+        }
+    }
+    if(found == 0) {
         return "GameNotFound";
     }
 }
@@ -250,8 +360,10 @@ function isEmpty(obj) {
 
 function restartApp() {
     try {
-      gameState = startGame();
-      console.log("Webserver was halted");
+        for(var g in GAMELIST) {
+            delete g;
+        }
+        console.log("Webserver was halted");
     } catch (e) {
       console.log("Can't stop webserver: ");
       console.log(e);
@@ -259,16 +371,20 @@ function restartApp() {
     if(pathmode == 0) {
         var sExecute = "node " + path.resolve('/Programs/Nodejs/sync/app/lobby.js');
     } else {
-        var sExecute = "node " + path.resolve('/home/hydra/tweetlord/tweetlord/sync/app/lobby.js');
+        var sExecute = "node " + path.resolve('/home/hydra/Apps/gamesuite/app/lobby.js');
     }
-    tweetlord.killed = true;
+    gamesuite.killed = true;
     var exec = require('child_process').exec;
     exec(sExecute, function () {
         console.log('APPLICATION RESTARTED');
-        rollTweeters();
-        console.log(gameState);
     });
 }
-
 /*******************************************************************************************************************************/
 //Imposter functions
+var imposter = require('./imposterFuncs.js');
+/*******************************************************************************************************************************/
+//Listen
+serv.listen(8081, function() {
+  console.log("GAMESUITE START!");
+});
+/*******************************************************************************************************************************/
