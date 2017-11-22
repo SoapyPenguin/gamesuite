@@ -28,6 +28,14 @@ header {
   align-items: center;
 }
 
+.automargin {
+  margin: auto;
+}
+
+.centertext {
+  text-align: center;
+}
+
 /* === MAIN PAGE ============================================================================================================= */
 .btn {
   font-family: "Source Sans Pro";
@@ -118,10 +126,15 @@ header {
   position: relative;
 }
 
+.imposter-waiting {
+  margin-left: 2em;
+  margin-top: 1em;
+}
+
 .il-player-list {
   list-style-type: none;
-  margin-top: 1em;
-  margin-bottom: 1em;
+  margin-top: 3em;
+  margin-bottom: 3em;
 }
 
 /* === BUTTONS ============================================================================================================= */

@@ -73,7 +73,12 @@
       </div>
     </div>
     <div class="imposter-content">
+    <!-- PHASE 0 /////////////////////////////////// -->
       <div class="imposter-lobby-view">
+        <div class="imposter-lobby-gcp">
+          <h4 class="imposter-waiting">Waiting for players...</h4>
+          <span class="imposter-gc">GAMECODE:</span>
+        </div>
         <ul class="il-player-list">
           <li class="il-li1"></li>
           <li class="il-li2"></li>
@@ -87,15 +92,28 @@
           <li class="il-li10"></li>
         </ul>
         <div class="il-timer-area">
-          <h4 class="il-ta-prompt">Starting in:</h4>
-          <span class="il-timer">(loading...)</span>
+          <h4 class="il-ta-prompt centertext">Starting in:</h4>
+          <h3 class="il-timer centertext">(loading...)</h3>
         </div>
         <div class="imposter-lobby-btns">
-          <button class="btn btn-lg btn-block">Postpone</button>
-          <button class="btn btn-lg btn-block">Hurry Up</button>
+          <button class="btn btn-lg btn-block postpone-btn">Postpone</button>
+          <button class="btn btn-lg btn-block hurry-btn">Hurry Up</button>
         </div>
       </div>
+    <!-- PHASE 1 /////////////////////////////////// -->
       <div class="imposter-game-view">
+        <ul class="il-player-list">
+          <li class="il-li1"></li>
+          <li class="il-li2"></li>
+          <li class="il-li3"></li>
+          <li class="il-li4"></li>
+          <li class="il-li5"></li>
+          <li class="il-li6"></li>
+          <li class="il-li7"></li>
+          <li class="il-li8"></li>
+          <li class="il-li9"></li>
+          <li class="il-li10"></li>
+        </ul>
         <div class="imposter-role-prompt">
         </div>
         <div class="imposter-scenario-prompt">
@@ -117,8 +135,20 @@ $(document).ready(function() {
     var gameState = {};
     var playerSlot = 0;
     var socketID = 0;
+    var socketName = "<none>";
     var gc = window.location.href.split("/")[4];
     var socket = io(localip);
+
+    //Buttons
+    $('.postpone-btn').on('click', function() {
+      socket.emit("postpone");
+      console.log("Postpone request sent");
+    });
+
+    $('.hurry-btn').on('click', function() {
+      socket.emit('impatience');
+      console.log("Impatience sent");
+    });
 
     //Setup
     socket.on('setup', function(data) {
@@ -129,12 +159,11 @@ $(document).ready(function() {
     });
     
     socket.on('playerJoin', function(data) {
-        console.log(data.name + " has joined as P" + data.slot);
+        console.log(data.player.name + " has joined as P" + data.player.slot);
+        playerSlot = data.player.slot;
+        socketName = data.player.name;
         for(var i = 1; i <= 10; i++) {
             $('.il-li' + i).text(data.gameState.players[i]);
-            if(data.gameState.players[i] == data.name) {
-                playerSlot = i;
-            }
         }
     });
 
@@ -143,12 +172,15 @@ $(document).ready(function() {
         $('.il-timer').text(data.gameState.timers[0]);
     });
 
+    socket.on('setupPh1', function(data) {
+
+    });
+
     //Ticks
     socket.on('tickPh0', function(data) {
         gameState = data.gameState;
         var t = data.gameState.timers[0];
         $('.il-timer').text(t);
-        console.log("tick");
     });
 
     //Misc
