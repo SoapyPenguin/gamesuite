@@ -62,6 +62,7 @@ function startGame(gameName) {
 }
 var GAMELIST = {};
 var SOCKETLIST = {};
+var PLAYERLIST = {};
 /*******************************************************************************************************************************/
 //Root page
 gamesuite.get('/', function(req, res) {
@@ -111,17 +112,25 @@ gamesuite.get('/imposter/:gameCode', function(req, res) {
 /*******************************************************************************************************************************/
 //Lobby forms
 gamesuite.post('/scripts/makeGame', function(req, res) {
+    //Make game
     var gameTitle = req.body.gameTitle;
     var newGame = startGame(gameTitle);
         newGame.players[1] = req.body.namepromptM;
         newGame.inProgress = true;
     GAMELIST[newGame.code] = newGame;
+    //Make player
+    var playerid = Object.keys(PLAYERLIST).length + 1;
+    var player = {
+        id: playerid,
+        slot: 1,
+        name: req.body.namepromptM,
+        gameTitle: req.body.gameTitle,
+        gc: newGame.code
+    }
+    PLAYERLIST[player.id] = player;
+    console.log(player);
     res.writeHead(301, { Location: '/' + gameTitle + '/' + newGame.code });
     res.end();
-    emitToGameC('playerJoin', newGame.code, {
-        name: req.body.namepromptM,
-        slot: 1
-    });
 });
 
 gamesuite.post('/scripts/joinGame', function(req, res) {
@@ -165,6 +174,7 @@ io.sockets.on('connection', function(socket) {
     //Connection
     var slen = Object.keys(SOCKETLIST).length;
     socket.id = slen + 1;
+    socket.player = PLAYERLIST[socket.id];
     socket.gameState = null;
     SOCKETLIST[socket.id] = socket;
     console.log("Socket connection initialized: socket " + socket.id);
@@ -184,9 +194,10 @@ io.sockets.on('connection', function(socket) {
         socket.gc = data.gc;
         socket.gameState = getGame(socket.gc);
         console.log("Socket " + socket.id + " has joined game " + socket.gc);
-        // socket.emit('playerJoin', {
-        //     gameState: socket.gameState
-        // });
+        socket.emit('playerJoin', {
+            gameState: socket.gameState,
+            player: socket.player
+        });
         if(socket.gameState.phase == 0) {
             socket.emit('setupPh0', {
                 gameState: socket.gameState
@@ -218,10 +229,12 @@ io.sockets.on('connection', function(socket) {
             }
         }
         if(isEmpty == true) {
+            console.log("Game " + socket.gameState.code + " abandoned: removing...");
             delete GAMELIST[socket.gameState.code];
         }
-        //Remove socket
+        //Remove socket/player
         delete SOCKETLIST[socket.id];
+        delete PLAYERLIST[socket.id];
         console.log("Socket " + socket.id + " disconnected");
     });
     //----------------------------------------------------------------
@@ -231,9 +244,10 @@ io.sockets.on('connection', function(socket) {
         if(socket.gameState.postpones > 4) {
             socket.emit('tooManyPostpones');
             return;
+        } else {
+            socket.gameState.postpones = socket.gameState.postpones + 1;
+            socket.gameState.timers[0] = socket.gameState.timers[0] + 15;
         }
-        socket.gameState.postpones = socket.gameState.postpones + 1;
-        socket.gameState.timers[0] = socket.gameState.timers[0] + 15;
     });
     
     socket.on('impatience', function() {
@@ -259,7 +273,7 @@ io.sockets.on('connection', function(socket) {
         for(var game in GAMELIST) {
             g = GAMELIST[game];
             //IMPOSTER
-            if(g.gameTitle == "imposter" && g.inProgress == true) {
+            if(g.title == "imposter" && g.inProgress == true) {
                 if(g.phase == 0) {
                     g.timers[0] -= 1;
                     socket.emit('tickPh0', {
