@@ -50,9 +50,10 @@ function startGame(gameName) {
             starttime: new Date().toISOString().slice(0, 19).replace('T', ' '),
             endtime: undefined,
             postpones: 0,
-            location: "undefined",
+            scenario: "undefined",
             roles: {1:99,2:99,3:99,4:99,5:99,6:99,7:99,8:99,9:99,10:99}
         }
+        gameState = imposter.assignRoles(gameState);
         console.log("New Imposter gameState created");
         return gameState;
     } else {
@@ -63,6 +64,9 @@ function startGame(gameName) {
 var GAMELIST = {};
 var SOCKETLIST = {};
 var PLAYERLIST = {};
+/*******************************************************************************************************************************/
+//Imposter functions
+var imposter = require('./imposterFuncs.js');
 /*******************************************************************************************************************************/
 //Root page
 gamesuite.get('/', function(req, res) {
@@ -191,6 +195,7 @@ io.sockets.on('connection', function(socket) {
     });
 
     socket.on('sendGC', function(data) {
+        //Fetch and assign gamestate
         socket.gc = data.gc;
         socket.gameState = getGame(socket.gc);
         console.log("Socket " + socket.id + " has joined game " + socket.gc);
@@ -199,9 +204,15 @@ io.sockets.on('connection', function(socket) {
             player: socket.player
         });
         if(socket.gameState.phase == 0) {
-            socket.emit('setupPh0', {
-                gameState: socket.gameState
-            });
+            if(socket.gameState.title == "imposter") {
+                var ph0data = {
+                    gameState: socket.gameState,
+                    scenarios: imposter.getScenarios()
+                };
+            } else {
+                var ph0data = { gameState: socket.gameState };
+            }
+            socket.emit('setupPh0', ph0data);
         }
     });
     //----------------------------------------------------------------
@@ -269,7 +280,11 @@ io.sockets.on('connection', function(socket) {
 
     //Game ticks =====================================================
 
-    setInterval(function() {
+    var tick = setInterval(function() {
+        if(Object.keys(GAMELIST).length == 0) {
+            console.log("No games in progress, stopping master tick...");
+            clearInterval(tick);
+        }
         for(var game in GAMELIST) {
             g = GAMELIST[game];
             //IMPOSTER
@@ -287,6 +302,9 @@ io.sockets.on('connection', function(socket) {
                     }
                 } else if(g.phase == 1) {
                     g.timers[1] -= 1;
+                    socket.emit('tickPh1', {
+                        gameState: g
+                    });
                     if(g.timers[1] < 1) {
                         g.phase = 2;
                         socket.emit('gameOver', {
@@ -333,10 +351,10 @@ function emitToGameC(event, gc, data) {
 }
 
 function generateGC() {
-    var gcchars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+    var gcchars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     var gc = "";
     for(var i = 0; i < 6; i++) {
-        var rc = gcchars.charAt(Math.floor(Math.random() * 36));
+        var rc = gcchars.charAt(Math.floor(Math.random() * 26));
         gc = gc + rc;
     }
     if(GAMELIST.hasOwnProperty(gc)) {
@@ -393,9 +411,6 @@ function restartApp() {
         console.log('APPLICATION RESTARTED');
     });
 }
-/*******************************************************************************************************************************/
-//Imposter functions
-var imposter = require('./imposterFuncs.js');
 /*******************************************************************************************************************************/
 //Listen
 serv.listen(8081, function() {
