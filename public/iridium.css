@@ -107,6 +107,7 @@ header {
   height: 50%;
 }
 
+/* Phase one */
 .imposter-menu-view {
   display: none;
   position: relative;
@@ -127,14 +128,29 @@ header {
 }
 
 .imposter-waiting {
-  margin-left: 2em;
   margin-top: 1em;
+}
+
+.imposter-lobby-gcp {
+  height: 6em;
+  margin-left: 2em;
+};
+
+.imposter-gc {
+  margin-left: 2em;
+  margin-bottom: 1em;
+  font-size: 1.5em;
 }
 
 .il-player-list {
   list-style-type: none;
   margin-top: 3em;
   margin-bottom: 3em;
+}
+
+/* Phase two */
+.imposter-game-view {
+  display: none;
 }
 
 /* === BUTTONS ============================================================================================================= */

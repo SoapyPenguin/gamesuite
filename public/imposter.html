@@ -73,12 +73,7 @@
       </div>
     </div>
     <div class="imposter-content">
-    <!-- PHASE 0 /////////////////////////////////// -->
       <div class="imposter-lobby-view">
-        <div class="imposter-lobby-gcp">
-          <h4 class="imposter-waiting">Waiting for players...</h4>
-          <span class="imposter-gc">GAMECODE:</span>
-        </div>
         <ul class="il-player-list">
           <li class="il-li1"></li>
           <li class="il-li2"></li>
@@ -91,6 +86,22 @@
           <li class="il-li9"></li>
           <li class="il-li10"></li>
         </ul>
+        <div class="imposter-lobby-gcp">
+          <h4 class="imposter-waiting">Waiting for players...</h4>
+          <h5 class="imposter-gc">GAMECODE:</h5>
+        </div>
+        <div class="imposter-game-view">
+          <div class="imposter-role-prompt">
+            <h2 class="role-prompt centertext"></h2>
+          </div>
+          <div class="imposter-scenario-prompt">
+            <h3 class="scenario-prompt centertext"></h3>
+          </div>
+          <div class="imposter-list-area">
+            <ul class="imposter-scenario-list">
+            </ul>
+          </div>
+        </div>
         <div class="il-timer-area">
           <h4 class="il-ta-prompt centertext">Starting in:</h4>
           <h3 class="il-timer centertext">(loading...)</h3>
@@ -98,29 +109,6 @@
         <div class="imposter-lobby-btns">
           <button class="btn btn-lg btn-block postpone-btn">Postpone</button>
           <button class="btn btn-lg btn-block hurry-btn">Hurry Up</button>
-        </div>
-      </div>
-    <!-- PHASE 1 /////////////////////////////////// -->
-      <div class="imposter-game-view">
-        <ul class="il-player-list">
-          <li class="il-li1"></li>
-          <li class="il-li2"></li>
-          <li class="il-li3"></li>
-          <li class="il-li4"></li>
-          <li class="il-li5"></li>
-          <li class="il-li6"></li>
-          <li class="il-li7"></li>
-          <li class="il-li8"></li>
-          <li class="il-li9"></li>
-          <li class="il-li10"></li>
-        </ul>
-        <div class="imposter-role-prompt">
-        </div>
-        <div class="imposter-scenario-prompt">
-        </div>
-        <div class="imposter-list-area">
-          <ul class="imposter-scenario-list">
-          </ul>
         </div>
       </div>
     </div>
@@ -133,6 +121,7 @@ $(document).ready(function() {
     //Globals
     var localip = 'ws://localhost:8081/';
     var gameState = {};
+    var scenarios = [];
     var playerSlot = 0;
     var socketID = 0;
     var socketName = "<none>";
@@ -152,6 +141,7 @@ $(document).ready(function() {
 
     //Setup
     socket.on('setup', function(data) {
+        $('.imposter-gc').html("GAMECODE: <strong>" + gc + "</strong>").css("font-size","1.5em");
         socketID = data.socketId;
         socket.emit('sendGC', {
             gc: gc
@@ -169,18 +159,35 @@ $(document).ready(function() {
 
     socket.on('setupPh0', function(data) {
         gameState = data.gameState;
+        scenarios = data.scenarios;
         $('.il-timer').text(data.gameState.timers[0]);
     });
 
     socket.on('setupPh1', function(data) {
-
+        gameState = data.gameState;
+        for(var i = 0; i < scenarios.length; i++) {
+            var loc = $("<li>", {id: ("scenario-li" + i), "class": "scenario-li"});
+            loc.text(scenarios[i]);
+            $('.imposter-scenario-list').append(loc);
+        }
+        $('.role-prompt').text("You are: " + gameState.roles[playerSlot]);
+        $('.scenario-prompt').text("Scenario: " + gameState.scenario);
+        $('il-ta-prompt').html("Time left:");
+        $('.imposter-waiting').remove();
+        $('.imposter-lobby-gcp').hide();
+        $('.imposter-lobby-btns').fadeOut();
+        $('.imposter-game-view').fadeIn();
     });
 
     //Ticks
     socket.on('tickPh0', function(data) {
         gameState = data.gameState;
-        var t = data.gameState.timers[0];
-        $('.il-timer').text(t);
+        $('.il-timer').text(data.gameState.timers[0]);
+    });
+
+    socket.on('tickPh1', function(data) {
+        gameState = data.gameState;
+        $('.il-timer').text(data.gameState.timers[1]);
     });
 
     //Misc
