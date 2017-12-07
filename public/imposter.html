@@ -97,18 +97,33 @@
           <div class="imposter-scenario-prompt">
             <h3 class="scenario-prompt centertext"></h3>
           </div>
-          <div class="imposter-list-area">
-            <ul class="imposter-scenario-list">
-            </ul>
-          </div>
+        </div>
+        <div class="timeout-view">
+          <h2 class="tv-h1 centertext">Time's up!</h2>
+          <h4 class="tv-h2 centertext">Vote for who you think is the imposter.</h4>
+          <h4 class="tv-h3 centertext"><strong>Unanimously</strong> decide correctly or they win!</h4>
+        </div>
+        <div class="imposter-win-view">
+          <h2 class="iw-h1 centertext">The <strong>Imposter</strong> has won!</h2>
+          <h3 class="iw-h2 centertext"></h3>
         </div>
         <div class="il-timer-area">
           <h4 class="il-ta-prompt centertext">Starting in:</h4>
           <h3 class="il-timer centertext">(loading...)</h3>
         </div>
+        <div class="imposter-voting-area">
+        </div>
         <div class="imposter-lobby-btns">
           <button class="btn btn-lg btn-block postpone-btn">Postpone</button>
           <button class="btn btn-lg btn-block hurry-btn">Hurry Up</button>
+        </div>
+        <div class="imposter-game-btns">
+          <button class="btn btn-lg btn-block new-btn">New Scenario</button>
+          <button class="btn btn-lg btn-block restart-btn">Back to Lobby</button>
+        </div>
+        <div class="imposter-list-area">
+          <ul class="imposter-scenario-list">
+          </ul>
         </div>
       </div>
     </div>
@@ -123,6 +138,7 @@ $(document).ready(function() {
     var gameState = {};
     var scenarios = [];
     var playerSlot = 0;
+    var isImposter = false;
     var socketID = 0;
     var socketName = "<none>";
     var gc = window.location.href.split("/")[4];
@@ -137,6 +153,30 @@ $(document).ready(function() {
     $('.hurry-btn').on('click', function() {
       socket.emit('impatience');
       console.log("Impatience sent");
+    });
+
+    $('.new-btn').on('click', function() {
+        if('replay' in gameState.votes) {
+            socket.emit('voteForReplay', {
+                slot: playerSlot
+            });
+        } else {
+            socket.emit('callReplayVote', {
+                slot: playerSlot
+            });
+        }
+    });
+
+    $('.restart-btn').on('click', function() {
+        if('restart' in gameState.votes) {
+            socket.emit('voteForRestart', {
+                slot: playerSlot
+            });
+        } else {
+            socket.emit('callRestartVote', {
+                slot: playerSlot
+            });
+        }
     });
 
     //Setup
@@ -165,18 +205,114 @@ $(document).ready(function() {
 
     socket.on('setupPh1', function(data) {
         gameState = data.gameState;
-        for(var i = 0; i < scenarios.length; i++) {
-            var loc = $("<li>", {id: ("scenario-li" + i), "class": "scenario-li"});
-            loc.text(scenarios[i]);
-            $('.imposter-scenario-list').append(loc);
+        if(gameState.roles[playerSlot] == "Imposter") {
+            isImposter = true;
         }
-        $('.role-prompt').text("You are: " + gameState.roles[playerSlot]);
-        $('.scenario-prompt').text("Scenario: " + gameState.scenario);
-        $('il-ta-prompt').html("Time left:");
+        for(var i = 0; i < scenarios.length; i++) {
+            var locbtn = $("<button>", {id: ("scenario-btn" + i), "class": "btn btn-lg btn-block scenario-btn"});
+            var currscen = scenarios[i];
+            locbtn.text(currscen);
+            if(isImposter) {
+                locbtn.on('click', function() {
+                    if($(this).text() == gameState.scenario) {
+                        socket.emit("imposterVictory");
+                        console.log("Good guess... you aren't cheating, are ya?");
+                    }
+                });
+            }
+            $('.imposter-scenario-list').append(locbtn);
+        }
+        if(isImposter) {
+            $('.role-prompt').text("You're the Imposter!");
+            $('.scenario-prompt').text("Try to blend in...");
+        } else {
+            $('.role-prompt').text("You are: " + gameState.roles[playerSlot]);
+            $('.scenario-prompt').text("Scenario: " + gameState.scenario);
+        }
+        $('.il-ta-prompt').html("Time left:");
         $('.imposter-waiting').remove();
         $('.imposter-lobby-gcp').hide();
-        $('.imposter-lobby-btns').fadeOut();
-        $('.imposter-game-view').fadeIn();
+        $('.imposter-lobby-btns').fadeOut(function() {
+            $('.imposter-game-view, .imposter-list-area, .imposter-game-btns').fadeIn();
+        });
+    });
+
+    socket.on('setupPh2', function(data) {
+        gameState = data.gameState;
+        $('.imposter-game-view').fadeOut(function() {
+            $('.timeout-view').fadeIn();
+        });
+    });
+
+    socket.on('setupPh3', function(data) {
+        gameState = data.gameState;
+        for(var p in gameState.roles) {
+            if(p == "Imposter") {
+                var imp = p;
+            } else {
+                console.log("Error in setupPh2: unable to find Imposter");
+            }
+        }
+        $('.iw-h2').text(gameState.players[imp] + " chose the correct scenario.");
+        $('.imposter-game-view').fadeOut(function() {
+            $('.imposter-win-view').fadeIn();
+        });
+    });
+
+    //Votes
+    socket.on('replayVote', function(data) {
+        gameState = data.gameState;
+        var replaytxt = $('<h4 class="replay-vote-txt centertext"></h4>').text(socketName + ' wants a new scenario');
+        var replaytimer = $('<h5 class="replay-timer centertext"></h5>').text(gameState.votes['replay'].time);
+        var replayamt = $('<h5 class="replay-amount centertext"></h5>').text('1 / ' + (gameState.playerct / 2) + ' votes');
+        var replaybtn = $('<button class="btn btn-lg btn-block replay-agree"></button>').on('click', function() {
+            socket.emit('voteForReplay', {
+                slot: playerSlot
+            });
+        }).text('Agree').css({
+            "width": "80%",
+            "margin": "auto"
+        });
+        var replaydiv = $('<div class="replay-vote" id="replay-vote"></div>').css({
+            "height": "12em",
+            "width": "75%",
+            "margin": "auto",
+            "border-style": "double",
+            "border-width": "thick",
+            "margin-bottom": "1em"
+        }).append(replaytxt).append(replaytimer).append(replayamt).append(replaybtn);
+        $('.imposter-voting-area').append(replaydiv);
+    });
+
+    //Votes
+    socket.on('restartVote', function(data) {
+        gameState = data.gameState;
+        var restarttxt = $('<h4 class="restart-vote-txt centertext"></h4>').text(socketName + ' wants to return to lobby');
+        var restarttimer = $('<h5 class="restart-timer centertext"></h5>').text(gameState.votes['restart'].time);
+        var restartamt = $('<h5 class="restart-amount centertext"></h5>').text('1 / ' + (gameState.playerct / 2) + ' votes');
+        var restartbtn = $('<button class="btn btn-lg btn-block restart-agree"></button>').on('click', function() {
+            socket.emit('voteForRestart', {
+                slot: playerSlot
+            });
+        }).text('Agree').css({
+            "width": "80%",
+            "margin": "auto"
+        });
+        var restartdiv = $('<div class="restart-vote" id="restart-vote"></div>').css({
+            "height": "12em",
+            "width": "75%",
+            "margin": "auto",
+            "border-style": "double",
+            "border-width": "thick",
+            "margin-bottom": "1em"
+        }).append(restarttxt).append(restarttimer).append(restartamt).append(restartbtn);
+        $('.imposter-voting-area').append(restartdiv);
+    });
+
+    socket.on('updateVotes', function(data) {
+        gameState = data.gameState;
+        $('.replay-timer').text(data.gameState.votes['replay'].time);
+        $('.restart-timer').text(data.gameState.votes['restart'].time);
     });
 
     //Ticks
@@ -188,6 +324,16 @@ $(document).ready(function() {
     socket.on('tickPh1', function(data) {
         gameState = data.gameState;
         $('.il-timer').text(data.gameState.timers[1]);
+    });
+
+    socket.on('voteTick', function(data) {
+        gameState = data.gameState;
+        if(gameState.votes['replay']) {
+            $('.replay-amount').text(gameState.votes['replay'].agree + ' / ' + (gameState.playerct / 2) + ' votes');
+        }
+        if(gameState.votes['restart']) {
+            $('.restart-amount').text(gameState.votes['restart'].agree + ' / ' + (gameState.playerct / 2) + ' votes');
+        }
     });
 
     //Misc
