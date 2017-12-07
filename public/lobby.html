@@ -70,18 +70,63 @@
         <ul class="lobby-menu">
           <li class="lm-imposter"><span class="label label-info imposter-btn" data-toggle="collapse" data-target="#imposter-dd" style="padding-right:30px;">Imposter</span></li>
             <div id="imposter-dd" class="collapse lm-dd">
-              <div class="btn-group">
-                <button class="imposter-new-btn btn btn-primary">New</button>
-                <button class="imposter-join-btn btn btn-info">Join</button>
-              </div>
+              <button class="imposter-new-btn btn btn-primary">New</button>
+              <button class="imposter-join-btn btn btn-info">Join</button>
+              <button class="imposter-about-btn btn"><a href="" data-toggle="modal" data-target="#imposter-modal">About</a></button>
             </div>
           <li class="lm-tweetlord"><span class="label label-info tweetlord-btn" data-toggle="collapse" data-target="#tweetlord-dd">Tweetlord</span></li>
             <div id="tweetlord-dd" class="collapse lm-dd">
               <button class="tweetlord-new-btn btn btn-primary">New</button>
               <button class="tweetlord-join-btn btn btn-info">Join</button>
+              <button class="tweetlord-about-btn btn" data-toggle="modal" data-target="#tweetlord-modal">About</button>
             </div>
           <li class="lm-options"><span class="label label-info options-btn">Options&nbsp&nbsp&nbsp&nbsp&nbsp</span></li>
         </ul>
+      </div>
+      <!-- About modals -->
+      <div id="imposter-modal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title">About Imposter</h4>
+            </div>
+            <div class="modal-body">
+              <p>Imposter is basically a clone of "Spyfall", but with different, more diverse scenarios.</p><br>
+              <h5>How to Play</h5>
+              <p>When the game starts, you are either shown a special scenario and your role in said scenario or you
+              are the randomly-chosen Imposter!</p><br>
+              <p>If you're <strong>not</strong> the Imposter, your job is to find who is in the same scenario as you
+              without tipping off the Imposter, who can guess the scenario from a list if you're too specific. Take turns
+              asking questions, and if someone seems like they don't belong, accuse them of being the Imposter.  If the
+              players <strong>unanimously</strong> decide that one person is the Imposter, the game ends.  If you've
+              correctly identified the Imposter, you win, but if you chose the wrong person, the Imposter wins.  If the time
+              runs out, a vote is immediately called.</p><br>
+              <p>If you're the Imposter, you've gotta blend in! Use deductive reasoning to choose the specific scenario that
+              your friends are in and you win. You can also win by letting the timer run out and convincing the rest of the players
+              to vote for someone else.</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="tweetlord-modal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title">Tweetlord (WIP)</h4>
+            </div>
+            <div class="modal-body">
+              <p>Tweetlord is not yet available</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
       </div>
       <!-- Imposter -->
       <div class="imposter-new-view new-view">

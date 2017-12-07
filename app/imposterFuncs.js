@@ -78,8 +78,8 @@ module.exports = {
 			                4: "Miner",
 			                5: "Miner",
 			                6: "Miner",
-			                7: "Miner",
-			                8: "Miner",
+			                7: "Geologist",
+			                8: "Geologist",
 			                9: "Miner"
 		            	}
 		        },
@@ -174,6 +174,7 @@ module.exports = {
 		        	}
 		        }
 	    	}
+	    	console.log("###IMPOSTER### Building new Imposter gameState...");
 	    	var slen = Object.keys(scenarios).length;
 	    	var lroll = Math.floor(Math.random() * slen);
 	    	gameState.scenario = scenarios[lroll].title;
@@ -181,7 +182,7 @@ module.exports = {
 	    	for(var i = 0; i < 10; i++) {
 	    		var pl = noRoles[Math.floor(Math.random() * noRoles.length)];
 	    		gameState.roles[pl] = scenarios[lroll].roles[i];
-	    		console.log("P" + pl + " assigned " + scenarios[lroll].roles[i]);
+	    		console.log("###IMPOSTER### P" + pl + " assigned " + scenarios[lroll].roles[i]);
 	    		noRoles.splice(noRoles.indexOf(pl), 1);
 	    	}
 	    	return gameState;
