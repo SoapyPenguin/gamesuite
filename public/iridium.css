@@ -181,11 +181,13 @@ header {
 /* Phase two */
 .timeout-view {
   display: none;
+  height: 8em;
 }
 
 /* Phase three */
 .imposter-win-view {
   display: none;
+  height: 9em;
 }
 
 /* === BUTTONS ============================================================================================================= */

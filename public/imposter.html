@@ -197,6 +197,13 @@ $(document).ready(function() {
         }
     });
 
+    socket.on('refreshPlayers', function(data) {
+        gameState = data.gameState;
+        for(var i = 1; i <= 10; i++) {
+            $('.il-li' + i).text(data.gameState.players[i]);
+        }
+    });
+
     socket.on('setupPh0', function(data) {
         gameState = data.gameState;
         scenarios = data.scenarios;
@@ -217,6 +224,8 @@ $(document).ready(function() {
                     if($(this).text() == gameState.scenario) {
                         socket.emit("imposterVictory");
                         console.log("Good guess... you aren't cheating, are ya?");
+                    } else {
+                        socket.emit("imposterFailure");
                     }
                 });
             }
@@ -230,8 +239,8 @@ $(document).ready(function() {
             $('.scenario-prompt').text("Scenario: " + gameState.scenario);
         }
         $('.il-ta-prompt').html("Time left:");
-        $('.imposter-waiting').remove();
-        $('.imposter-lobby-gcp').hide();
+        $('.imposter-waiting').fadeOut();
+        $('.imposter-lobby-gcp').fadeOut();
         $('.imposter-lobby-btns').fadeOut(function() {
             $('.imposter-game-view, .imposter-list-area, .imposter-game-btns').fadeIn();
         });
@@ -247,24 +256,91 @@ $(document).ready(function() {
     socket.on('setupPh3', function(data) {
         gameState = data.gameState;
         for(var p in gameState.roles) {
-            if(p == "Imposter") {
+            player = gameState.roles[p];
+            if(player == "Imposter") {
                 var imp = p;
-            } else {
-                console.log("Error in setupPh2: unable to find Imposter");
             }
         }
+        if(!imp) {
+            console.log("Error in setupPh3: unable to find imposter");
+        }
+        $('.il-timer-area').fadeOut();
         $('.iw-h2').text(gameState.players[imp] + " chose the correct scenario.");
         $('.imposter-game-view').fadeOut(function() {
             $('.imposter-win-view').fadeIn();
         });
     });
 
+    socket.on('setupPh4', function(data) {
+        gameState = data.gameState;
+        for(var p in gameState.roles) {
+            player = gameState.roles[p];
+            if(player == "Imposter") {
+                var imp = p;
+            }
+        }
+        if(!imp) {
+            console.log("Error in setupPh4: unable to find imposter");
+        }
+        $('.il-timer-area').fadeOut();
+        $('.iw-h1').html('<strong>Bystanders</strong> win.');
+        $('.iw-h2').text(gameState.players[imp] + " done fucked up.");
+        $('.imposter-game-view').fadeOut(function() {
+            $('.imposter-win-view').fadeIn();
+        });
+    });
+
+    socket.on('restartGame', function(data) {
+        isImposter = false;
+        gameState = data.gameState;
+        if($('.imposter-game-view').is(':visible')) {
+            $('.imposter-game-view').fadeOut();
+        }
+        if($('.timeout-view').is(':visible')) {
+            $('.timeout-view').fadeOut();
+        }
+        if($('.imposter-win-view').is(':visible')) {
+            $('.imposter-win-view').fadeOut();
+        }
+        if($('.imposter-game-btns').is(':visible')) {
+            $('.imposter-game-btns').fadeOut();
+        }
+        if($('.imposter-list-area').is(':visible')) {
+            $('.imposter-list-area').fadeOut();
+        }
+        if($('.votebox').is(':visible')) {
+            $('.votebox').fadeOut(function() {
+                $('.votebox').remove();
+            });
+        }
+        $('.imposter-lobby-gcp, .il-timer-area, .imposter-lobby-btns, .imposter-waiting').fadeIn();
+    });
+
+    socket.on('replayGame', function(data) {
+        isImposter = false;
+        gameState = data.gameState;
+        if($('.timeout-view').is(':visible')) {
+            $('.timeout-view').fadeOut();
+        }
+        if($('.imposter-win-view').is(':visible')) {
+            $('.imposter-win-view').fadeOut();
+        }
+        if($('.votebox').is(':visible')) {
+            $('.votebox').fadeOut(function() {
+                $('.votebox').remove();
+            });
+        }
+        $('.imposter-scenario-list').empty();
+        $('.imposter-game-view, .il-timer-area, .imposter-game-btns').fadeIn();
+    });
+
     //Votes
     socket.on('replayVote', function(data) {
         gameState = data.gameState;
-        var replaytxt = $('<h4 class="replay-vote-txt centertext"></h4>').text(socketName + ' wants a new scenario');
+        var replaytxt = $('<h4 class="replay-vote-txt centertext"></h4>')
+            .text(gameState.players[gameState.votes.replay.callerslot] + ' wants a new scenario');
         var replaytimer = $('<h5 class="replay-timer centertext"></h5>').text(gameState.votes['replay'].time);
-        var replayamt = $('<h5 class="replay-amount centertext"></h5>').text('1 / ' + (gameState.playerct / 2) + ' votes');
+        var replayamt = $('<h5 class="replay-amount centertext"></h5>').text('1 / ' + Math.round(gameState.playerct / 2) + ' votes');
         var replaybtn = $('<button class="btn btn-lg btn-block replay-agree"></button>').on('click', function() {
             socket.emit('voteForReplay', {
                 slot: playerSlot
@@ -273,23 +349,26 @@ $(document).ready(function() {
             "width": "80%",
             "margin": "auto"
         });
-        var replaydiv = $('<div class="replay-vote" id="replay-vote"></div>').css({
+        var replaydiv = $('<div class="replay-vote votebox" id="replay-vote"></div>').css({
             "height": "12em",
             "width": "75%",
             "margin": "auto",
             "border-style": "double",
             "border-width": "thick",
-            "margin-bottom": "1em"
+            "margin-bottom": "1em",
+            "display": "none"
         }).append(replaytxt).append(replaytimer).append(replayamt).append(replaybtn);
         $('.imposter-voting-area').append(replaydiv);
+        replaydiv.fadeIn();
     });
 
     //Votes
     socket.on('restartVote', function(data) {
         gameState = data.gameState;
-        var restarttxt = $('<h4 class="restart-vote-txt centertext"></h4>').text(socketName + ' wants to return to lobby');
+        var restarttxt = $('<h4 class="restart-vote-txt centertext"></h4>')
+            .text(gameState.players[gameState.votes.restart.callerslot] + ' wants to return to lobby');
         var restarttimer = $('<h5 class="restart-timer centertext"></h5>').text(gameState.votes['restart'].time);
-        var restartamt = $('<h5 class="restart-amount centertext"></h5>').text('1 / ' + (gameState.playerct / 2) + ' votes');
+        var restartamt = $('<h5 class="restart-amount centertext"></h5>').text('1 / ' + Math.round(gameState.playerct / 2) + ' votes');
         var restartbtn = $('<button class="btn btn-lg btn-block restart-agree"></button>').on('click', function() {
             socket.emit('voteForRestart', {
                 slot: playerSlot
@@ -298,21 +377,27 @@ $(document).ready(function() {
             "width": "80%",
             "margin": "auto"
         });
-        var restartdiv = $('<div class="restart-vote" id="restart-vote"></div>').css({
+        var restartdiv = $('<div class="restart-vote votebox" id="restart-vote"></div>').css({
             "height": "12em",
             "width": "75%",
             "margin": "auto",
             "border-style": "double",
             "border-width": "thick",
-            "margin-bottom": "1em"
+            "margin-bottom": "1em",
+            "display": "none"
         }).append(restarttxt).append(restarttimer).append(restartamt).append(restartbtn);
         $('.imposter-voting-area').append(restartdiv);
+        restartdiv.fadeIn();
     });
 
     socket.on('updateVotes', function(data) {
         gameState = data.gameState;
-        $('.replay-timer').text(data.gameState.votes['replay'].time);
-        $('.restart-timer').text(data.gameState.votes['restart'].time);
+        if(gameState.votes.replay) {
+            $('.replay-amount').text(gameState.votes.replay.agree + " / " + Math.round(gameState.playerct / 2) + " votes");
+        }
+        if(gameState.votes.restart) {
+           $('.restart-amount').text(gameState.votes.restart.agree + " / " + Math.round(gameState.playerct / 2) + " votes");
+        }
     });
 
     //Ticks
@@ -329,10 +414,24 @@ $(document).ready(function() {
     socket.on('voteTick', function(data) {
         gameState = data.gameState;
         if(gameState.votes['replay']) {
-            $('.replay-amount').text(gameState.votes['replay'].agree + ' / ' + (gameState.playerct / 2) + ' votes');
+            if(gameState.votes['replay'].time < 0) {
+                $('.replay-vote').fadeOut(function() {
+                    $('.replay-vote').remove();
+                });
+            } else {
+                $('.replay-timer').text(gameState.votes['replay'].time);
+            }
+            $('.replay-amount').text(gameState.votes['replay'].agree + ' / ' + Math.round(gameState.playerct / 2) + ' votes');
         }
         if(gameState.votes['restart']) {
-            $('.restart-amount').text(gameState.votes['restart'].agree + ' / ' + (gameState.playerct / 2) + ' votes');
+            if(gameState.votes['restart'].time < 0) {
+                $('.restart-vote').fadeOut(function() {
+                    $('.restart-vote').remove();
+                });
+            } else {
+                $('.restart-timer').text(gameState.votes['restart'].time);
+            }
+            $('.restart-amount').text(gameState.votes['restart'].agree + ' / ' + Math.round(gameState.playerct / 2) + ' votes');
         }
     });
 
