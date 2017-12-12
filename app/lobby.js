@@ -22,6 +22,7 @@ function startGame(gameName) {
         var gameState = {
             title: "tweetlord",
             inProgress: false,
+            joinable: true,
             code: generateGC(),
             players: {1:"",2:"",3:"",4:"",5:"",6:""},
             playerct: 0,
@@ -44,6 +45,7 @@ function startGame(gameName) {
         var gameState = {
             title: "imposter",
             inProgress: false,
+            joinable: true,
             code: generateGC(),
             players: {1:"",2:"",3:"",4:"",5:"",6:"",7:"",8:"",9:"",10:""},
             playerct: 0,
@@ -137,7 +139,7 @@ gamesuite.post('/scripts/makeGame', function(req, res) {
         gc: newGame.code
     }
     PLAYERLIST[player.id] = player;
-    console.log(player);
+    console.log("Player " + player.id + " created");
     res.writeHead(301, { Location: '/' + gameTitle + '/' + newGame.code });
     res.end();
 });
@@ -147,32 +149,56 @@ gamesuite.post('/scripts/joinGame', function(req, res) {
     var gameTitle = req.body.gameTitle;
     var myGame = getGame(cgc);
     if(myGame == "GameNotFound") {
-        alert("No game exists with that game code");
+        res.status(500).send("No game exists with that game code");
+        res.end();
+        return;
+    }
+    if(myGame.joinable == false) {
+        res.status(500).send("That game is currently in progress");
+        res.end();
         return;
     }
     //Check if full
     var isFull = true;
     for(var p in myGame.players) {
-        if(p == "") {
+        var pname = myGame.players[p];
+        if(pname == "") {
             isFull = false;
             break;
         }
     }
     if(isFull) {
-        alert("Sorry, that game is full");
+        res.status(500).send("Sorry, that game is full");
+        res.end();
         return;
     }
     //Add name
-    for(var i = 0; i < 6; i++) {
-        //Be original
-        if(myGame.players[i] == req.body.namepromptJ) {
-            req.body.namepromptJ = "Other " + req.body.namepromptJ;
+    try {
+        for(var i = 0; i < 6; i++) {
+            //Be original
+            if(myGame.players[i] == req.body.namepromptJ) {
+                req.body.namepromptJ = "Other " + req.body.namepromptJ;
+            }
+            if(myGame.players[i] == "") {
+                myGame.players[i] = req.body.namepromptJ;
+                myGame.playerct += 1;
+                var playerid = Object.keys(PLAYERLIST).length + 1;
+                var player = {
+                    id: playerid,
+                    slot: i,
+                    name: req.body.namepromptJ,
+                    gameTitle: req.body.gameTitle,
+                    gc: myGame.code
+                }
+                PLAYERLIST[player.id] = player;
+                console.log("Player " + player.id + " created");
+                break;
+            }
         }
-        if(myGame.players[i] == "") {
-            myGame.players[i] = req.body.namepromptJ;
-            myGame.playerct += 1;
-            break;
-        }
+    } catch(err) {
+        res.status(500).send("Internal error in joining game");
+        res.end();
+        return;
     }
     res.writeHead(301, { Location: '/' + gameTitle + '/' + cgc });
     res.end();
@@ -210,6 +236,7 @@ io.sockets.on('connection', function(socket) {
             gameState: socket.gameState,
             player: socket.player
         });
+        emitToGame('refreshPlayers', socket.gameState.code);
         if(socket.gameState.phase == 0) {
             if(socket.gameState.title == "imposter") {
                 var ph0data = {
@@ -227,7 +254,8 @@ io.sockets.on('connection', function(socket) {
     //Disconnection ==================================================
     socket.on('disconnect', function() {
         //Remove player
-        socket.gameState.players[socket.id] = "*disconnected*";
+        socket.gameState.players[socket.id] = "";
+        socket.gameState.playerct -= 1;
         //Move players down
         if(socket.gameState.players[socket.id + 1] != "") {
             for(var i = (socket.id + 1); i < 7; i++) {
@@ -242,7 +270,7 @@ io.sockets.on('connection', function(socket) {
         //Remove game if no players left
         var isEmpty = true;
         for(var i = 1; i < 11; i++) {
-            if((socket.gameState.players[i] != "") && (socket.gameState.players[i] != "*disconnected*")) {
+            if(socket.gameState.players[i] != "") {
                 isEmpty = false;
             }
         }
@@ -250,6 +278,7 @@ io.sockets.on('connection', function(socket) {
             console.log("Game " + socket.gameState.code + " abandoned: removing...");
             delete GAMELIST[socket.gameState.code];
         }
+        emitToGame('refreshPlayers', socket.gameState.code);
         //Remove socket/player
         delete SOCKETLIST[socket.id];
         delete PLAYERLIST[socket.id];
@@ -292,6 +321,11 @@ io.sockets.on('connection', function(socket) {
         emitToGame('setupPh3', socket.gameState.code);
     });
 
+    socket.on('imposterFailure', function() {
+        socket.gameState.phase = 4;
+        emitToGame('setupPh4', socket.gameState.code);
+    });
+
     socket.on('callRestartVote', function(data) {
         if(!('restart' in socket.gameState.votes)) {
             var rvote = {
@@ -311,6 +345,19 @@ io.sockets.on('connection', function(socket) {
     socket.on('voteForRestart', function() {
         if('restart' in socket.gameState.votes && socket.gameState.votes['restart'].agreed.indexOf(socket.player.slot) == -1) {
             socket.gameState.votes['restart'].agree += 1;
+            if(socket.gameState.votes.restart.agree >= Math.round(socket.gameState.playerct * .75)) {
+                console.log("[" + socket.gameState.code + "] Restart vote successful, restarting game...");
+                socket.gameState.joinable = true;
+                socket.gameState.timers[0] = 60;
+                socket.gameState.timers[1] = 360;
+                socket.gameState.phase = 0;
+                socket.gameState = imposter.assignRoles(socket.gameState);
+                emitToGame('restartGame', socket.gameState.code);
+                setTimeout(function() {
+                    emitToGame('setup', socket.gameState.code);
+                    emitToGame('setupPh0', socket.gameState.code);
+                }, 800);
+            }
         }
         emitToGame('updateVotes', socket.gameState.code);
     });
@@ -334,6 +381,18 @@ io.sockets.on('connection', function(socket) {
     socket.on('voteForReplay', function() {
         if('replay' in socket.gameState.votes && socket.gameState.votes['replay'].agreed.indexOf(socket.player.slot) == -1) {
             socket.gameState.votes['replay'].agree += 1;
+            if(socket.gameState.votes.replay.agree >= Math.round(socket.gameState.playerct * .75)) {
+                console.log("[" + socket.gameState.code + "] Replay vote successful, resetting scenarios...");
+                socket.gameState.timers[0] = 60;
+                socket.gameState.timers[1] = 360;
+                socket.gameState.phase = 1;
+                socket.gameState = imposter.assignRoles(socket.gameState);
+                socket.gameState = imposter.chooseImposter(socket.gameState);
+                emitToGame('replayGame', socket.gameState.code);
+                setTimeout(function() {
+                    emitToGame('setupPh1', socket.gameState.code);
+                }, 800);
+            }
         }
         emitToGame('updateVotes', socket.gameState.code);
     });
@@ -341,21 +400,25 @@ io.sockets.on('connection', function(socket) {
 });
 /******************************************************************************************************************************/
 //Clock
-if(idle) {
-    var idlepoll = setInterval(function() {
-        if(Object.keys(GAMELIST).length > 0) {
-            console.log("Booting up!");
-            startClock();
-            clearInterval(idlepoll);
-        }
-    }, 2000);
+function idlePoll() {
+    if(idle) {
+        var idlepoll = setInterval(function() {
+            if(Object.keys(GAMELIST).length > 0) {
+                console.log("Booting up!");
+                startClock();
+                clearInterval(idlepoll);
+            }
+        }, 2000);
+    }
 }
+idlePoll();
 function startClock() {
     var tick = setInterval(function() {
         if(Object.keys(GAMELIST).length == 0) {
             console.log("No games in progress, going idle...");
             idle = true;
             clearInterval(tick);
+            idlePoll();
         } else {
             idle = false;
         }
@@ -366,6 +429,7 @@ function startClock() {
                 ph1: game
                 ph2: vote call (time run out)
                 ph3: imposter victory
+                ph4: bystander victory (imposter messed up)
             **/
             if(g.title == "imposter" && g.inProgress == true) {
                 if(g.phase == 0) {
@@ -373,8 +437,8 @@ function startClock() {
                     emitToGame('tickPh0', g.code);
                     if(g.timers[0] < 1) {
                         g.phase = 1;
-                        var iroll = Math.floor(Math.random() * g.playerct);
-                        g.roles[iroll+1] = "Imposter";
+                        g.joinable = false;
+                        g = imposter.chooseImposter(g);
                         emitToGame('setupPh1', g.code);
                     }
                 } else if(g.phase == 1) {
@@ -385,6 +449,14 @@ function startClock() {
                         emitToGame('setupPh2', g.code);
                     }
                     if(!isEmpty(g.votes)) {
+                        for(v in g.votes) {
+                            vote = g.votes[v];
+                            if(vote.time < 0) {
+                                delete(g.votes[v]);
+                            } else {
+                                vote.time -= 1;
+                            }
+                        }
                         emitToGame('voteTick', g.code);
                     }
                 }
@@ -427,7 +499,7 @@ function emitToGameC(event, gc, data) {
 function generateGC() {
     var gcchars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     var gc = "";
-    for(var i = 0; i < 6; i++) {
+    for(var i = 0; i < 4; i++) {
         var rc = gcchars.charAt(Math.floor(Math.random() * 26));
         gc = gc + rc;
     }

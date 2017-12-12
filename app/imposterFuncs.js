@@ -199,5 +199,11 @@ module.exports = {
 				"ISIS Camp",
 				"Art Museum"	];
 		return locations;
+	},
+	chooseImposter: function(g) {
+		var iroll = Math.floor(Math.random() * g.playerct);
+                g.roles[iroll+1] = "Imposter";
+                console.log("###IMPOSTER### Imposter role assigned to P" + (iroll + 1));
+                return g;
 	}
 }
