@@ -178,11 +178,30 @@ header {
   position: relative;
 }
 
-.imposter-new-btn, .tweetlord-new-btn {
+.imposter-new-btn{
   width: 4em;
 }
 
 .imposter-join-view {
+  display: none;
+  position: relative;
+}
+
+.pistolwhip-menu-view {
+  display: none;
+  position: relative;
+}
+
+.pistolwhip-new-view {
+  display: none;
+  position: relative;
+}
+
+.pistolwhip-new-btn {
+  width: 4em;
+}
+
+.pistolwhip-join-view {
   display: none;
   position: relative;
 }
