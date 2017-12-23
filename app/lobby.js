@@ -11,7 +11,7 @@ gamesuite.use(bodyParser.urlencoded({ extended: false }));
 gamesuite.use(bodyParser.json());
 
 //Desktop: 0, Laptop: 1
-var pathmode = 1;
+var pathmode = 0;
 
 gamesuite.use(express.static(__dirname + '/../public'));
 console.log("Loading...");
@@ -77,7 +77,7 @@ var imposter = require('./imposterFuncs.js');
 //Root page
 gamesuite.get('/', function(req, res) {
   if(pathmode == 0) {
-    res.sendFile(path.resolve('/Programs/Nodejs/sync/public/lobby.html'));
+    res.sendFile(path.resolve('/Programs/gamesuite/public/lobby.html'));
   } else if(pathmode == 1) {
     res.sendFile(path.resolve('/home/hydra/Apps/gamesuite/public/lobby.html'));
   }
@@ -88,14 +88,14 @@ gamesuite.get('/tweetlord/:gameCode', function(req, res) {
   if(req.url == "/tweetlord/neon.css") {
     res.set("Content-Type", "text/css");
     if(pathmode == 0) {
-      res.sendFile(path.resolve('/Programs/Nodejs/sync/public/neon.css'));
+      res.sendFile(path.resolve('/Programs/gamesuite/public/neon.css'));
     } else if(pathmode == 1) {
       res.sendFile(path.resolve('/home/hydra/Apps/gamesuite/public/neon.css'));
     }
   } else {
     res.set("Content-Type", "text/html");
     if(pathmode == 0) {
-      res.sendFile(path.resolve('/Programs/Nodejs/sync/public/tweetlord.html'));
+      res.sendFile(path.resolve('/Programs/gamesuite/public/tweetlord.html'));
     } else if(pathmode == 1) {
       res.sendFile(path.resolve('/home/hydra/Apps/gamesuite/public/tweetlord.html'));
     }
@@ -106,16 +106,34 @@ gamesuite.get('/imposter/:gameCode', function(req, res) {
     if(req.url == "/imposter/iridium.css") {
     res.set("Content-Type", "text/css");
     if(pathmode == 0) {
-      res.sendFile(path.resolve('/Programs/Nodejs/sync/public/iridium.css'));
+      res.sendFile(path.resolve('/Programs/gamesuite/public/iridium.css'));
     } else if(pathmode == 1) {
       res.sendFile(path.resolve('/home/hydra/Apps/gamesuite/public/iridium.css'));
     }
   } else {
     res.set("Content-Type", "text/html");
     if(pathmode == 0) {
-      res.sendFile(path.resolve('/Programs/Nodejs/sync/public/imposter.html'));
+      res.sendFile(path.resolve('/Programs/gamesuite/public/imposter.html'));
     } else if(pathmode == 1) {
       res.sendFile(path.resolve('/home/hydra/Apps/gamesuite/public/imposter.html'));
+    }
+  }
+});
+
+gamesuite.get('/pistolwhip', function(req, res) {
+    if(req.url == "/pistolwhip/platinum.css") {
+    res.set("Content-Type", "text/css");
+    if(pathmode == 0) {
+      res.sendFile(path.resolve('/Programs/gamesuite/public/platinum.css'));
+    } else if(pathmode == 1) {
+      res.sendFile(path.resolve('/home/hydra/Apps/gamesuite/public/platinum.css'));
+    }
+  } else {
+    res.set("Content-Type", "text/html");
+    if(pathmode == 0) {
+      res.sendFile(path.resolve('/Programs/gamesuite/public/pistolwhip.html'));
+    } else if(pathmode == 1) {
+      res.sendFile(path.resolve('/home/hydra/Apps/gamesuite/public/pistolwhip.html'));
     }
   }
 });
@@ -124,6 +142,11 @@ gamesuite.get('/imposter/:gameCode', function(req, res) {
 gamesuite.post('/scripts/makeGame', function(req, res) {
     //Make game
     var gameTitle = req.body.gameTitle;
+	if(gameTitle == "pistolwhip") {
+		res.writeHead(301, { Location: '/' + gameTitle });
+		res.end();
+		return;
+	}
     var newGame = startGame(gameTitle);
         newGame.players[1] = req.body.namepromptM;
         newGame.playerct += 1;
