@@ -74,11 +74,11 @@
               <button class="imposter-join-btn btn btn-info">Join</button>
               <button class="imposter-about-btn btn"><a href="" data-toggle="modal" data-target="#imposter-modal">About</a></button>
             </div>
-          <li class="lm-tweetlord"><span class="label label-info tweetlord-btn" data-toggle="collapse" data-target="#tweetlord-dd">Tweetlord</span></li>
-            <div id="tweetlord-dd" class="collapse lm-dd">
-              <button class="tweetlord-new-btn btn btn-primary">New</button>
-              <button class="tweetlord-join-btn btn btn-info">Join</button>
-              <button class="tweetlord-about-btn btn" data-toggle="modal" data-target="#tweetlord-modal">About</button>
+          <li class="lm-pistolwhip"><span class="label label-info pistolwhip-btn" data-toggle="collapse" data-target="#pistolwhip-dd">PistolWhip</span></li>
+            <div id="pistolwhip-dd" class="collapse lm-dd">
+              <button class="pistolwhip-new-btn btn btn-primary">New</button>
+              <button class="pistolwhip-join-btn btn btn-info">Join</button>
+              <button class="pistolwhip-about-btn btn" data-toggle="modal" data-target="#pistolwhip-modal">About</button>
             </div>
           <li class="lm-options"><span class="label label-info options-btn">Options&nbsp&nbsp&nbsp&nbsp&nbsp</span></li>
         </ul>
@@ -112,15 +112,15 @@
           </div>
         </div>
       </div>
-      <div id="tweetlord-modal" class="modal fade" role="dialog">
+      <div id="pistolwhip-modal" class="modal fade" role="dialog">
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
               <button type="button" class="close" data-dismiss="modal">&times;</button>
-              <h4 class="modal-title">Tweetlord (WIP)</h4>
+              <h4 class="modal-title">pistolwhip (WIP)</h4>
             </div>
             <div class="modal-body">
-              <p>Tweetlord is not yet available</p>
+              <p>pistolwhip is a WIP, beyotch</p>
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -144,6 +144,31 @@
         <button class="btn btn-default back-btn">Back</button>
         <form action="/scripts/joinGame" method="post" name="gamecode-prompt" id="gamecode-prompt" class="form-horizontal">
           <input type="hidden" name="gameTitle" value="imposter">
+          <h4 class="nameprompt-header" align="center">Choose a name</h4>
+          <input type="text" name="namepromptJ" class="form-control" id="nameprompt-input" maxlength="16" placeholder="16 characters max" autofocus required>
+          <h4 class="nameprompt-header" align="center">Enter game code</h4>
+          <input type="text" name="gameprompt" class="form-control" id="gameprompt-input" maxlength="6" autofocus required>
+          <div class="join-submit">
+            <button type="submit" name="join-game-submit" class="btn btn-primary">Join Game!</button>
+          </div>
+        </form>
+      </div>
+	  <!-- PistolWhip -->
+      <div class="pistolwhip-new-view new-view">
+        <button class="btn btn-default back-btn">Back</button>
+        <h4 class="nameprompt-header" align="center">What's your name?</h4>
+        <form action="/scripts/makeGame" method="post" name="name-prompt" id="name-prompt" class="form-horizontal">
+          <input type="hidden" name="gameTitle" value="pistolwhip">
+          <input type="text" name="namepromptM" class="form-control" id="nameprompt-input" maxlength="16" placeholder="16 characters max" autofocus required>
+          <div class="make-submit">
+            <button type="submit" name="make-game-submit" class="btn btn-primary">Start Game!</button>
+          </div>
+        </form>
+      </div>
+      <div class="pistolwhip-join-view join-view">
+        <button class="btn btn-default back-btn">Back</button>
+        <form action="/scripts/joinGame" method="post" name="gamecode-prompt" id="gamecode-prompt" class="form-horizontal">
+          <input type="hidden" name="gameTitle" value="pistolwhip">
           <h4 class="nameprompt-header" align="center">Choose a name</h4>
           <input type="text" name="namepromptJ" class="form-control" id="nameprompt-input" maxlength="16" placeholder="16 characters max" autofocus required>
           <h4 class="nameprompt-header" align="center">Enter game code</h4>
@@ -182,19 +207,19 @@ $(document).ready(function() {
 		});
 	});
 
-  $('.tweetlord-new-btn').on('click', function() {
-    lmChoice = 2;
-    $('.menu-view').fadeOut(function() {
-      $('.tweetlord-new-view').fadeIn();
-    });
-  });
+	$('.pistolwhip-new-btn').on('click', function() {	
+		lmChoice = 2;
+		$('.menu-view').fadeOut(function() {
+			$('.pistolwhip-new-view').fadeIn();
+		});
+	});
 
-  $('.tweetlord-join-btn').on('click', function() {
-    lmChoice = 2;
-    $('.menu-view').fadeOut(function() {
-      $('.tweetlord-join-view').fadeIn();
-    });
-  });
+	$('.pistolwhip-join-btn').on('click', function() {
+		lmChoice = 2;
+		$('.menu-view').fadeOut(function() {
+			$('.pistolwhip-join-view').fadeIn();
+		});
+	});
 
 	$('.options-btn').on('click', function() {
 		lmChoice = 3;
@@ -205,19 +230,9 @@ $(document).ready(function() {
 
 	$('.back-btn').on('click', function() {
 		lmChoice = 0;
-		if($('.new-view').css('display') != 'none') {
-			$('.new-view').fadeOut(function() {
-				$('.menu-view').fadeIn();
-			});
-		} else if($('.join-view').css('display') != 'none') {
-			$('.join-view').fadeOut(function() {
-				$('.menu-view').fadeIn();
-			});
-		} else if($('.options-view').css('display') != 'none') {
-			$('.options-view').fadeOut(function() {
-				$('.menu-view').fadeIn();
-			});
-		}
+		$('.new-view, .join-view, .options-view').fadeOut(function() {
+			$('.menu-view').fadeIn();
+		});
 	});
 });
 </script>
